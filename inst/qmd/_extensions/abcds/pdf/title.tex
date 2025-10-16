@@ -1,0 +1,13 @@
+$if(title)$
+\title{\vspace{40mm}\huge\textbf{\textcolor{abcdsnavy}{$title$}$if(thanks)$\thanks{$thanks$}$endif$}}
+$endif$
+$if(subtitle)$
+  \usepackage{etoolbox}
+  \makeatletter
+  \providecommand{\subtitle}[1]{ % add subtitle to \maketitle
+    \apptocmd{\@title}{\par {\Large\textit{\textcolor{abcdsnavy}{#1}} \par}}{}{}
+  }
+  \subtitle{$subtitle$}
+$endif$
+\author{$for(authors)$$it.name.literal$$sep$, $endfor$}
+\date{$date$}

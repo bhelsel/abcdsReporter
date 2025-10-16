@@ -1,0 +1,67 @@
+## Imaging
+
+```{r getting imaging metadata from atri}
+#| echo: false
+#| eval: !expr params$imaging
+
+amy <- abcdsReporter::get_imaging(done, imaging = "amymeta")
+mri <- abcdsReporter::get_imaging(done, imaging = "mrimeta")
+fdg <- abcdsReporter::get_imaging(done, imaging = "fdgmeta")
+
+amy$Scan <- "Amyloid PET Scan"
+mri$Scan <- "MRI Imaging"
+fdg$Scan <- "FDG PET Scan"
+
+imaging_data <- dplyr::bind_rows(amy, mri, fdg)
+imaging_data$event_label <- gsub(" - ", "\n", imaging_data$event_label)
+
+imaging_data |>
+  dplyr::group_by(Scan, event_label) |>
+  dplyr::summarize(
+    done = sum(as.numeric(done), na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  tidyr::pivot_wider(
+    names_from = event_label,
+    values_from = done,
+    values_fill = 0
+  ) |>
+  flextable::flextable() |>
+  abcdsReporter:::ft_add_abcds_theme()
+
+```
+
+\newpage
+
+```{r getting imaging metadata from atri by site}
+#| echo: false
+#| eval: !expr params$imaging
+
+imaging_data |>
+  dplyr::group_by(Scan, Site = site_label, event_code) |>
+  dplyr::count(done) |>
+  dplyr::mutate(
+    done = factor(done, levels = 0:1, labels = c("No", "Yes")),
+    event_code = factor(
+      event_code,
+      levels = c("cyc1", "cyc2", "cyc3"),
+      labels = c("Cycle 1\n", "Cycle 2\n", "Cycle 3\n")
+    )
+  ) |>
+  tidyr::pivot_wider(
+    id_cols = c(Scan, Site),
+    names_from = c(event_code, done),
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  `colnames<-`(gsub("_", " ", colnames(.))) |>
+  dplyr::arrange(Site) |>
+  flextable::as_grouped_data(groups = "Site") |>
+  flextable::as_flextable(hide_grouplabel = TRUE) |>
+  abcdsReporter:::ft_add_abcds_theme(grouped_column = TRUE) |>
+  flextable::bold(i = ~ !is.na(Site)) |>
+  flextable::padding(i = ~ is.na(Site), padding.left = 10) |>
+  flextable::width(j = 1, width = 1.15) |>
+  flextable::width(j = 2:7, width = 0.7)
+
+```

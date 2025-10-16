@@ -1,0 +1,10 @@
+{
+    "editor.defaultFormatter": "esbenp.prettier-vscode",
+    "editor.formatOnSave": true,
+    "[quarto]": {
+        "editor.defaultFormatter": "quarto.quarto"
+    },
+    "[r]": {
+        "editor.defaultFormatter": "Posit.air-vscode"
+    }
+}

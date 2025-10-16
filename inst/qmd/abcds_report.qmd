@@ -1,0 +1,44 @@
+---
+title: Alzheimer's Biomarker Consortium - Down Syndrome
+subtitle: Internal Reporting for the ABC-DS Study
+format:
+  abcds-pdf: default
+  #abcds-docx: default
+  #abcds-html: default
+  #abcds-pptx: default
+  #abcds-revealjs: default
+author:
+  - name: Brian C. Helsel, PhD
+  - role: Assistant Professor
+  - center: KU Alzheimer's Disease Research Center
+  - institution: Neurology | University of Kansas Medical Center
+    email: bhelsel@kumc.edu
+    affiliations: 
+        - ref: kuadrc
+    attributes:
+        corresponding: true
+affiliations:
+  - id: kuadrc
+    name: "University of Kansas Alzheimer's Disease Research Center"
+    department: Neurology
+    address: 4330 Shawnee Mission Pkwy
+    city: Fairway
+    state: Kansas
+    postal-code: 66205
+---
+
+```{r extracting parameters from yaml file}
+#| echo: false
+#| message: false
+
+library(magrittr)
+
+params <- yaml::read_yaml("_variables.yaml")
+
+```
+
+{{< include sections/demographics.qmd >}}
+
+{{< include sections/imaging.qmd >}}
+
+{{< include sections/consensus.qmd >}}

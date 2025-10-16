@@ -1,0 +1,39 @@
+title: Alzheimer's Biomarker Consortium - Down Syndrome (ABC-DS) Study Quarto Format
+author: Brian C Helsel
+version: 0.0.1
+quarto-required: ">=1.5.0"
+contributes:
+  formats:
+    common:
+      embed-resources: true
+      date-format: long
+      execute:
+        echo: false
+        message: false
+        warning: false
+    pdf:
+      template-partials:
+        - "pdf/title.tex"
+        - "pdf/before-body.tex"
+      include-in-header:
+        - "pdf/mytemplate.tex"
+      include-before-body:
+        - "pdf/pagestyle.tex"
+      code-block-bg: codeblock
+      linkcolor: highlight
+      urlcolor: highlight
+    docx:
+      reference-doc: "docx/word-template.docx"
+    html:
+      mainfont: Times
+      title-block-banner: true
+      css: html/custom.css
+      code-block-bg: "#E6E6FA"
+    pptx:
+      reference-doc: "pptx/powerpoint-template.pptx"
+      filters:
+        - pptx/change-text.lua
+        - pptx/title-slide.lua
+    revealjs:
+      slide-number: true
+      theme: revealjs/custom.scss

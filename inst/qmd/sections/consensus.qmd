@@ -1,0 +1,26 @@
+
+```{r getting consensus data from atri}
+#| echo: false
+#| eval: !expr params$consensus_primary_by_cycle
+
+consensus <- abcdsReporter::get_consensus(
+  ccdprim,
+  prcldgpr,
+  apply_labels = TRUE
+)
+consensus$event_label <- gsub(" - Month [0-9]{1,2}", "", consensus$event_label)
+attr(consensus$ccdprim, "label") <- "Primary Diagnosis"
+
+consensus %>%
+  dplyr::group_by(Cycle = event_label, ccdprim) %>%
+  dplyr::count(ccdprim) %>%
+  tidyr::pivot_wider(
+    id_cols = ccdprim,
+    names_from = Cycle,
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme()
+
+```

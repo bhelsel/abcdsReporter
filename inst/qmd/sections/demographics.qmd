@@ -1,0 +1,43 @@
+```{r demographics text}
+#| echo: false
+#| eval: !expr params$demographics
+
+## Demographics
+
+```
+
+```{r retreiving demographics from atri}
+#| echo: false
+#| eval: !expr params$demographics
+
+demographics <- abcdsReporter::get_demographics(
+  site = NULL,
+  cycle = NULL,
+  apply_labels = TRUE,
+  age_at_visit,
+  de_race,
+  de_gender,
+  de_ethnicity
+)
+
+demographics |>
+  dplyr::select(
+    age_at_visit,
+    de_gender,
+    de_ethnicity,
+    `White `:`Native Hawaiian/Other Pacific Islander`
+  ) |>
+  dplyr::mutate(
+    de_gender = forcats::fct_drop(de_gender),
+    de_ethnicity = forcats::fct_drop(de_ethnicity)
+  ) |>
+  gtsummary::tbl_summary(
+    missing = "no",
+    label = list(age_at_visit ~ "Age (Years)"),
+    statistic = list(gtsummary::all_continuous() ~ "{mean} ± {sd}"),
+    digits = list(gtsummary::all_continuous() ~ 1)
+  ) |>
+  gtsummary::as_flex_table() |>
+  abcdsReporter:::ft_add_abcds_theme()
+
+```
