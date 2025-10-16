@@ -2,6 +2,9 @@
 ```{r getting consensus data from atri}
 #| echo: false
 #| eval: !expr params$consensus_primary_by_cycle
+#| results: asis
+
+abcdsReporter:::format_quarto("Consensus Primary By Cycle", "subsection")
 
 consensus <- abcdsReporter::get_consensus(
   ccdprim,

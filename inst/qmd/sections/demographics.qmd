@@ -1,14 +1,9 @@
-```{r demographics text}
-#| echo: false
-#| eval: !expr params$demographics
-
-## Demographics
-
-```
-
 ```{r retreiving demographics from atri}
 #| echo: false
 #| eval: !expr params$demographics
+#| results: asis
+
+abcdsReporter:::format_quarto("Demographics", "subsection")
 
 demographics <- abcdsReporter::get_demographics(
   site = NULL,

@@ -328,3 +328,32 @@ get_ids <- function(data) {
   indx <- grepl("subject_label|site_|event_code|event_label", n)
   n[indx]
 }
+
+
+#' @title FUNCTION_TITLE
+#' @description FUNCTION_DESCRIPTION
+#' @param x PARAM_DESCRIPTION
+#' @param type PARAM_DESCRIPTION
+#' @return OUTPUT_DESCRIPTION
+#' @details DETAILS
+#' @examples
+#' \dontrun{
+#' if(interactive()){
+#'  #EXAMPLE1
+#'  }
+#' }
+#' @seealso
+#'  \code{\link[glue]{glue}}
+#' @rdname format_quarto
+#' @keywords internal
+#' @importFrom glue glue
+
+format_quarto <- function(x, type) {
+  if (type == "section") {
+    cat(glue::glue("\\subsection{{{x}}}"), sep = "\n")
+  } else if (type == "subsection") {
+    cat(glue::glue("\\subsection{{{x}}}"), sep = "\n")
+  } else if (type == "newpage") {
+    cat("\\newpage")
+  }
+}

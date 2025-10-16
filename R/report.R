@@ -46,7 +46,7 @@ generate_report <- function(..., outputdir) {
     ))
   }
 
-  qmdfolder <- system.file("qmd", package = "atri")
+  qmdfolder <- system.file("qmd", package = "abcdsReporter")
 
   invisible(
     file.copy(
@@ -75,10 +75,10 @@ generate_report <- function(..., outputdir) {
     output_file = pdffile
   )
 
-  files <- list.files(reportdir)
+  files <- list.files(reportdir, full.names = TRUE)
   non_pdf_files <- files[!grepl("\\.pdf$", files, ignore.case = TRUE)]
 
-  invisible(file.remove(non_pdf_files))
+  invisible(unlink(non_pdf_files, recursive = TRUE))
 
   # # Adjust pdffile location if it is added to the id folder
   # if (!file.exists(pdffile)) {

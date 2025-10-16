@@ -1,8 +1,9 @@
-## Imaging
-
 ```{r getting imaging metadata from atri}
 #| echo: false
 #| eval: !expr params$imaging
+#| results: asis
+
+abcdsReporter:::format_quarto("Imaging", "subsection")
 
 amy <- abcdsReporter::get_imaging(done, imaging = "amymeta")
 mri <- abcdsReporter::get_imaging(done, imaging = "mrimeta")
