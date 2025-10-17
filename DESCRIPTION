@@ -15,6 +15,7 @@ Imports:
   httr2,
   jsonlite,
   magrittr,
+  memoise,
   officer,
   purrr,
   quarto,

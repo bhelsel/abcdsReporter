@@ -6,33 +6,41 @@
 abcdsReporter:::format_quarto("Demographics", "subsection")
 
 demographics <- abcdsReporter::get_demographics(
-  site = NULL,
-  cycle = NULL,
-  apply_labels = TRUE,
   age_at_visit,
   de_race,
   de_gender,
-  de_ethnicity
+  de_ethnicity,
+  site = NULL,
+  cycle = NULL,
+  apply_labels = TRUE
 )
 
-demographics |>
+demographics %>%
+  dplyr::mutate(de_race = NA) %>%
   dplyr::select(
     age_at_visit,
     de_gender,
     de_ethnicity,
+    de_race,
     `White `:`Native Hawaiian/Other Pacific Islander`
-  ) |>
+  ) %>%
   dplyr::mutate(
     de_gender = forcats::fct_drop(de_gender),
     de_ethnicity = forcats::fct_drop(de_ethnicity)
-  ) |>
+  ) %>%
   gtsummary::tbl_summary(
     missing = "no",
-    label = list(age_at_visit ~ "Age (Years)"),
+    label = list(age_at_visit ~ "Age (Years)", de_race = "Race"),
     statistic = list(gtsummary::all_continuous() ~ "{mean} ± {sd}"),
     digits = list(gtsummary::all_continuous() ~ 1)
-  ) |>
-  gtsummary::as_flex_table() |>
-  abcdsReporter:::ft_add_abcds_theme()
+  ) %>%
+  gtsummary::as_tibble() %>%
+  `colnames<-`(., c("Variable", "N = 562")) %>%
+  dplyr::mutate(`N = 562` = ifelse(Variable == "Race", NA, `N = 562`)) %>% # Need a better solution here.
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::bold(i = c(1:2, 5:6), j = 1)
+
+abcdsReporter:::format_quarto(type = "newpage")
 
 ```

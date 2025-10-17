@@ -348,7 +348,7 @@ get_ids <- function(data) {
 #' @keywords internal
 #' @importFrom glue glue
 
-format_quarto <- function(x, type) {
+format_quarto <- function(x = NULL, type) {
   if (type == "section") {
     cat(glue::glue("\\subsection{{{x}}}"), sep = "\n")
   } else if (type == "subsection") {

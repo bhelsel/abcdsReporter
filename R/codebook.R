@@ -56,6 +56,12 @@ get_codebook <- function(study, codebook) {
 
   data_dict <- data_dict[!duplicated(data_dict), ]
 
+  data_dict$field_question <- gsub(
+    "^\\d{1,2}[a-z]\\.?\\s*|^\\d{1,2}\\.?\\s*",
+    "",
+    data_dict$field_question
+  )
+
   return(data_dict)
 }
 
@@ -148,7 +154,7 @@ apply_factor_labels <- function(data, dictionary) {
     parsed <- jsonlite::fromJSON(gsub("'", '"', x))
     list(
       levels = as.numeric(names(parsed)),
-      labels = unname(unlist(parsed))
+      labels = gsub("\\/\n|\\/ ", " ", unname(unlist(parsed)))
     )
   }) %>%
     `names<-`(., dictionary$field_name)

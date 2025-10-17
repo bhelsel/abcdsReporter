@@ -30,9 +30,9 @@ imaging_data |>
   flextable::flextable() |>
   abcdsReporter:::ft_add_abcds_theme()
 
-```
+abcdsReporter:::format_quarto(type = "newline")
 
-\newpage
+```
 
 ```{r getting imaging metadata from atri by site}
 #| echo: false
@@ -64,5 +64,7 @@ imaging_data |>
   flextable::padding(i = ~ is.na(Site), padding.left = 10) |>
   flextable::width(j = 1, width = 1.15) |>
   flextable::width(j = 2:7, width = 0.7)
+
+abcdsReporter:::format_quarto(type = "newline")
 
 ```

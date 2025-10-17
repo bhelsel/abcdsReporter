@@ -1,0 +1,132 @@
+```{r getting health history data from atri}
+#| echo: false
+#| eval: !expr params$healthhistory
+#| results: asis
+
+abcdsReporter:::format_quarto("Health History", "subsection")
+
+healthhistory <- abcdsReporter::get_health(
+  hh_hypothyroidism,
+  hh_hyperlipidemia,
+  hh_menopausal,
+  hh_asd,
+  hh_vsd,
+  hh_avcanal,
+  hh_terfal,
+  dataset = healthhistory_,
+  codebook = healthhistory.csv,
+  apply_labels = TRUE
+)
+
+chd <- c("hh_asd", "hh_vsd", "hh_avcanal", "hh_terfal")
+chdlabels <- c(
+  "Atrial Septal Defect (ASD)",
+  "Ventricular Septal Defect (VSD)",
+  "Atrioventricular (AV) Canal",
+  "Tetralogy of Fallot"
+)
+
+healthhistory %>%
+  dplyr::select(dplyr::all_of(chd)) %>%
+  dplyr::mutate_at(dplyr::vars(hh_asd:hh_terfal), .funs = function(x) {
+    #x <- gsub(" \\/ |\\/ |\\/", "\n", x)
+    ifelse(is.na(x), "Unknown", as.character(x))
+  }) %>%
+  tidyr::pivot_longer(cols = dplyr::all_of(chd)) %>%
+  dplyr::group_by(`CHD Type` = name) %>%
+  dplyr::count(value) %>%
+  tidyr::pivot_wider(
+    id_cols = `CHD Type`,
+    names_from = value,
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  dplyr::mutate(
+    `CHD Type` = factor(`CHD Type`, levels = chd, labels = chdlabels)
+  ) %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::width(j = 1, width = 2.25) %>%
+  flextable::width(j = 2:5, width = 0.75)
+
+abcdsReporter:::format_quarto(type = "newpage")
+
+
+```
+
+
+```{r formatting table for absent, active, and inactive health history variables}
+#| echo: false
+#| eval: !expr params$healthhistory
+#| results: asis
+
+hhvars <- c("hh_hypothyroidism", "hh_hyperlipidemia")
+hhvarlabels <- c("Hypothyroidism", "Hyperlipidemia")
+
+healthhistory %>%
+  dplyr::select(dplyr::all_of(hhvars)) %>%
+  dplyr::mutate_at(dplyr::all_of(hhvars), .funs = function(x) {
+    x <- gsub("\\/ ", "\\/", x)
+    ifelse(is.na(x), "Unknown", x)
+  }) %>%
+  tidyr::pivot_longer(cols = dplyr::all_of(hhvars)) %>%
+  dplyr::group_by(`Health History` = name) %>%
+  dplyr::count(value) %>%
+  tidyr::pivot_wider(
+    id_cols = `Health History`,
+    names_from = value,
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  dplyr::mutate(
+    `Health History` = factor(
+      `Health History`,
+      levels = hhvars,
+      labels = hhvarlabels
+    )
+  ) %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::width(width = page_width / 5)
+
+
+abcdsReporter:::format_quarto(type = "newpage")
+
+```
+
+
+```{r formatting table for yes and no health history variables}
+#| echo: false
+#| eval: !expr params$healthhistory
+#| results: asis
+
+hhvarsyn <- c("hh_menopausal")
+hhvarlabelsyn <- c("Menopausal")
+
+healthhistory %>%
+  dplyr::select(site_label, dplyr::all_of(hhvarsyn)) %>%
+  dplyr::mutate(
+    hh_menopausal = factor(
+      dplyr::case_when(
+        hh_menopausal == "Yes" ~ "Yes",
+        hh_menopausal == "No" ~ "No",
+        TRUE ~ "Unknown /\n Not Applicable"
+      ),
+      levels = c("Yes", "No", "Unknown /\n Not Applicable")
+    )
+  ) %>%
+  dplyr::group_by(Site = site_label) %>%
+  dplyr::count(hh_menopausal) %>%
+  tidyr::pivot_wider(
+    id_cols = Site,
+    names_from = hh_menopausal,
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::width(j = 1, width = 2.5) %>%
+  flextable::width(j = 2:3, width = 0.75) %>%
+  flextable::width(j = 4, width = 1.5)
+
+```

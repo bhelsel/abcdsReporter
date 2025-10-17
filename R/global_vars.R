@@ -21,4 +21,9 @@ if (getRversion() >= "2.15.1") {
 }
 
 
-.all_reports <- c("demographics", "imaging", "consensus_primary_by_cycle")
+.all_reports <- c(
+  "demographics",
+  "imaging",
+  "consensus_primary_by_cycle",
+  "healthhistory"
+)

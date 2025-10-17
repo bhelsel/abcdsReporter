@@ -33,6 +33,7 @@ affiliations:
 
 library(magrittr)
 
+page_width = 5.25
 params <- yaml::read_yaml("_variables.yaml")
 
 ```
@@ -42,3 +43,5 @@ params <- yaml::read_yaml("_variables.yaml")
 {{< include sections/imaging.qmd >}}
 
 {{< include sections/consensus.qmd >}}
+
+{{< include sections/healthhistory.qmd >}}
