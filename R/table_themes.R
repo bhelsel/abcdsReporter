@@ -99,7 +99,7 @@ ft_add_abcds_theme <- function(
     )
 
   # Striped rows (every other row)
-  if (nrow(ft_tbl$body$dataset > 1)) {
+  if (nrow(ft_tbl$body$dataset) > 1) {
     ft_tbl <- ft_tbl %>%
       flextable::bg(
         i = seq(2, nrow(ft_tbl$body$dataset), 2),
