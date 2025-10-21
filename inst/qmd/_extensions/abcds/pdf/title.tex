@@ -2,12 +2,22 @@ $if(title)$
 \title{\vspace{40mm}\huge\textbf{\textcolor{abcdsnavy}{$title$}$if(thanks)$\thanks{$thanks$}$endif$}}
 $endif$
 $if(subtitle)$
-  \usepackage{etoolbox}
-  \makeatletter
-  \providecommand{\subtitle}[1]{ % add subtitle to \maketitle
-    \apptocmd{\@title}{\par {\Large\textit{\textcolor{abcdsnavy}{#1}} \par}}{}{}
-  }
-  \subtitle{$subtitle$}
+\usepackage{etoolbox}
+\makeatletter
+\providecommand{\subtitle}[1]{ % add subtitle to \maketitle
+  \apptocmd{\@title}{\par {\Large\textit{\textcolor{abcdsnavy}{#1}} \par}}{}{}
+}
+\subtitle{$subtitle$}
 $endif$
-\author{$for(authors)$$it.name.literal$$sep$, $endfor$}
+%\author{$for(authors)$$it.name.literal$$sep$, $endfor$}
+
+\author{
+  $for(by-author)$
+  {\large $it.name.literal$}%
+  $if(it.attributes.corresponding)$\thanks{Report produced by.}$endif$ \\%
+  $for(it.affiliations)$$it.name$ \\$endfor$%
+    {\url{$it.email$}}
+  $endfor$
+}
+
 \date{$date$}
