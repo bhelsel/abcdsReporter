@@ -36,7 +36,7 @@ codebook. The function supports optional filtering by site and cycle and allows 
 variable labels for enhanced interpretability.
 }
 \details{
-This function provides a convenient wrapper around \code{\link{get_abcds_data}}
+This function provides a convenient wrapper around get_abcds_data
 to streamline access to ABC-DS health variables. Quasiquotation is used to support
 tidy evaluation, allowing unquoted variable names and symbol references.
 }
@@ -59,5 +59,4 @@ if (interactive()) {
 }
 \seealso{
 \code{\link[rlang]{as_string}}, \code{\link[rlang]{defusing-advanced}},
-\code{\link{get_abcds_data}}
 }

@@ -16,7 +16,7 @@
 #' If `apply_labels = TRUE`, variable labels are attached to the output as attributes.
 #'
 #' @details
-#' This function provides a convenient wrapper around \code{\link{get_abcds_data}}
+#' This function provides a convenient wrapper around get_abcds_data
 #' to streamline access to ABC-DS health variables. Quasiquotation is used to support
 #' tidy evaluation, allowing unquoted variable names and symbol references.
 #'
@@ -38,7 +38,6 @@
 #'
 #' @seealso
 #'  \code{\link[rlang]{as_string}}, \code{\link[rlang]{defusing-advanced}},
-#'  \code{\link{get_abcds_data}}
 #'
 #' @rdname get_health
 #' @export
@@ -67,5 +66,6 @@ get_health <- function(
 
 # devtools::install()
 # devtools::load_all()
-# generate_report(demographics, healthhistory, outputdir = "/Users/bhelsel/Desktop")
+# generate_report(demographics, outputdir = "/Users/bhelsel/Desktop")
+# generate_report(demographics, imaging, healthhistory, outputdir = "/Users/bhelsel/Desktop")
 # generate_report(healthhistory, outputdir = "/Users/bhelsel/Desktop")

@@ -96,14 +96,17 @@ ft_add_abcds_theme <- function(
     flextable::hline_bottom(
       part = "body",
       border = officer::fp_border(color = "#444444", width = 2)
-    ) %>%
-
-    # Striped rows (every other row)
-    flextable::bg(
-      i = seq(2, nrow(ft_tbl$body$dataset), 2),
-      bg = stripe_color,
-      part = "body"
     )
+
+  # Striped rows (every other row)
+  if (nrow(ft_tbl$body$dataset > 1)) {
+    ft_tbl <- ft_tbl %>%
+      flextable::bg(
+        i = seq(2, nrow(ft_tbl$body$dataset), 2),
+        bg = stripe_color,
+        part = "body"
+      )
+  }
 
   # Center alignment for all columns except the first
   if (n_cols > 1) {

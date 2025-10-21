@@ -49,9 +49,6 @@ healthhistory %>%
   flextable::width(j = 1, width = 2.25) %>%
   flextable::width(j = 2:5, width = 0.75)
 
-abcdsReporter:::format_quarto(type = "newpage")
-
-
 ```
 
 
@@ -87,10 +84,7 @@ healthhistory %>%
   ) %>%
   flextable::flextable() %>%
   abcdsReporter:::ft_add_abcds_theme() %>%
-  flextable::width(width = page_width / 5)
-
-
-abcdsReporter:::format_quarto(type = "newpage")
+  flextable::width(j = 1:5, width = 1.05)
 
 ```
 
@@ -104,7 +98,7 @@ hhvarsyn <- c("hh_menopausal")
 hhvarlabelsyn <- c("Menopausal")
 
 healthhistory %>%
-  dplyr::select(site_label, dplyr::all_of(hhvarsyn)) %>%
+  #dplyr::select(site_label, dplyr::all_of(hhvarsyn)) %>%
   dplyr::mutate(
     hh_menopausal = factor(
       dplyr::case_when(
@@ -115,14 +109,13 @@ healthhistory %>%
       levels = c("Yes", "No", "Unknown /\n Not Applicable")
     )
   ) %>%
-  dplyr::group_by(Site = site_label) %>%
   dplyr::count(hh_menopausal) %>%
   tidyr::pivot_wider(
-    id_cols = Site,
     names_from = hh_menopausal,
     values_from = n,
     values_fill = 0
   ) %>%
+  cbind(`Health History` = hhvarlabelsyn, .) %>%
   flextable::flextable() %>%
   abcdsReporter:::ft_add_abcds_theme() %>%
   flextable::width(j = 1, width = 2.5) %>%

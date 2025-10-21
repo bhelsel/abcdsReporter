@@ -14,10 +14,14 @@ mri$Scan <- "MRI Imaging"
 fdg$Scan <- "FDG PET Scan"
 
 imaging_data <- dplyr::bind_rows(amy, mri, fdg)
-imaging_data$event_label <- gsub(" - ", "\n", imaging_data$event_label)
+imaging_data$event_label <- gsub(
+  " - Month [0-9]{1,2}",
+  "",
+  imaging_data$event_label
+)
 
-imaging_data |>
-  dplyr::group_by(Scan, event_label) |>
+imaging_data %>%
+  dplyr::group_by(Scan, event_label) %>%
   dplyr::summarize(
     done = sum(as.numeric(done), na.rm = TRUE),
     .groups = "drop"
@@ -27,20 +31,22 @@ imaging_data |>
     values_from = done,
     values_fill = 0
   ) |>
-  flextable::flextable() |>
-  abcdsReporter:::ft_add_abcds_theme()
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::width(j = 1, width = 2.25) %>%
+  flextable::width(j = 2:4, width = 1)
 
-abcdsReporter:::format_quarto(type = "newline")
+abcdsReporter:::format_quarto(type = "newpage")
 
 ```
 
 ```{r getting imaging metadata from atri by site}
 #| echo: false
-#| eval: !expr params$imaging
+#| eval: !expr params$imaging_by_site
 
-imaging_data |>
-  dplyr::group_by(Scan, Site = site_label, event_code) |>
-  dplyr::count(done) |>
+imaging_data %>%
+  dplyr::group_by(Scan, Site = site_label, event_code) %>%
+  dplyr::count(done) %>%
   dplyr::mutate(
     done = factor(done, levels = 0:1, labels = c("No", "Yes")),
     event_code = factor(
@@ -48,23 +54,23 @@ imaging_data |>
       levels = c("cyc1", "cyc2", "cyc3"),
       labels = c("Cycle 1\n", "Cycle 2\n", "Cycle 3\n")
     )
-  ) |>
+  ) %>%
   tidyr::pivot_wider(
     id_cols = c(Scan, Site),
     names_from = c(event_code, done),
     values_from = n,
     values_fill = 0
   ) %>%
-  `colnames<-`(gsub("_", " ", colnames(.))) |>
-  dplyr::arrange(Site) |>
-  flextable::as_grouped_data(groups = "Site") |>
-  flextable::as_flextable(hide_grouplabel = TRUE) |>
-  abcdsReporter:::ft_add_abcds_theme(grouped_column = TRUE) |>
-  flextable::bold(i = ~ !is.na(Site)) |>
-  flextable::padding(i = ~ is.na(Site), padding.left = 10) |>
-  flextable::width(j = 1, width = 1.15) |>
+  `colnames<-`(gsub("_", " ", colnames(.))) %>%
+  dplyr::arrange(Site) %>%
+  flextable::as_grouped_data(groups = "Site") %>%
+  flextable::as_flextable(hide_grouplabel = TRUE) %>%
+  abcdsReporter:::ft_add_abcds_theme(grouped_column = TRUE) %>%
+  flextable::bold(i = ~ !is.na(Site)) %>%
+  flextable::padding(i = ~ is.na(Site), padding.left = 10) %>%
+  flextable::width(j = 1, width = 1.15) %>%
   flextable::width(j = 2:7, width = 0.7)
 
-abcdsReporter:::format_quarto(type = "newline")
+abcdsReporter:::format_quarto(type = "newpage")
 
 ```
