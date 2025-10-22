@@ -122,4 +122,7 @@ healthhistory %>%
   flextable::width(j = 2:3, width = 0.75) %>%
   flextable::width(j = 4, width = 1.75)
 
+
+abcdsReporter:::format_quarto(type = "newpage")
+
 ```

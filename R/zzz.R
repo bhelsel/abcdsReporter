@@ -9,7 +9,9 @@
   if (!dir.exists(cache_dir)) {
     dir.create(cache_dir, recursive = TRUE)
   }
-  cache <- cachem::cache_disk(dir = cache_dir, max_age = 15 * 60)
+
+  # Expires in cache automatically after 24 hours
+  cache <- cachem::cache_disk(dir = cache_dir, max_age = 86400)
 
   .abcds_cache$memoised_atri_get <- memoise::memoise(atri_get, cache = cache)
 

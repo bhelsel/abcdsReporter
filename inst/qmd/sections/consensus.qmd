@@ -26,4 +26,6 @@ consensus %>%
   flextable::flextable() %>%
   abcdsReporter:::ft_add_abcds_theme()
 
+abcdsReporter:::format_quarto(type = "newpage")
+
 ```

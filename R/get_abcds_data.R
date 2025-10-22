@@ -21,6 +21,13 @@ get_abcds_data <- function(
 
   ids <- get_ids(data)
 
+  # Exam date is found in translated value instead of field value
+  if ("examdate" %in% variables) {
+    data[, "dd_revision_field_value"] <- data[,
+      "dd_revision_field_translated_value"
+    ]
+  }
+
   data <- tidyr::pivot_wider(
     data,
     id_cols = dplyr::all_of(ids),

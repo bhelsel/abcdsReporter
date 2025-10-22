@@ -3,10 +3,6 @@ title: Alzheimer's Biomarker Consortium - Down Syndrome
 subtitle: Internal Reporting for the ABC-DS Study
 format:
   abcds-pdf: default
-  #abcds-docx: default
-  #abcds-html: default
-  #abcds-pptx: default
-  #abcds-revealjs: default
 author:
   - name: Brian C. Helsel, PhD
     role: "Assistant Professor"
@@ -29,7 +25,6 @@ author:
 
 library(magrittr)
 
-page_width = 5.25
 params <- yaml::read_yaml("_variables.yaml")
 
 ```
@@ -41,3 +36,10 @@ params <- yaml::read_yaml("_variables.yaml")
 {{< include sections/consensus.qmd >}}
 
 {{< include sections/healthhistory.qmd >}}
+
+{{< include sections/apoe.qmd >}}
+
+{{< include sections/karyotype.qmd >}}
+
+{{< include sections/omics.qmd >}}
+

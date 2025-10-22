@@ -1,7 +1,8 @@
 #' @title FUNCTION_TITLE
 #' @description FUNCTION_DESCRIPTION
-#' @param outputdir PARAM_DESCRIPTION
 #' @param ... PARAM_DESCRIPTION
+#' @param outputdir PARAM_DESCRIPTION
+#' @param lonidir PARAM_DESCRIPTION
 #' @return OUTPUT_DESCRIPTION
 #' @details DETAILS
 #' @examples
@@ -22,7 +23,7 @@
 #' @importFrom yaml write_yaml
 #' @importFrom quarto quarto_render
 
-generate_report <- function(..., outputdir) {
+generate_report <- function(..., outputdir, lonidir = NULL) {
   reports <- as.character(rlang::enexprs(...))
   # if (is.null(reports)) {
   #   reports <- all_reports
@@ -60,7 +61,8 @@ generate_report <- function(..., outputdir) {
   yaml::write_yaml(
     c(
       list(
-        outputdir = outputdir
+        outputdir = outputdir,
+        lonidir = lonidir
       ),
       reports
     ),
@@ -97,10 +99,3 @@ generate_report <- function(..., outputdir) {
 
   return(reports)
 }
-
-# .all_reports
-
-# generate_report(
-#   consensus_primary_by_cycle,
-#   outputdir = "/Users/bhelsel/Desktop"
-# )

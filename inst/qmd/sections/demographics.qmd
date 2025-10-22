@@ -1,4 +1,54 @@
 
+
+```{r get enrollment by cycle}
+#| echo: false
+#| eval: !expr params$enrollment_by_cycle
+#| results: asis
+
+abcdsReporter:::format_quarto("Enrollment by Cycle", "subsection")
+
+enrollment <- abcdsReporter::get_registry(
+  examdate,
+  dataset = registry,
+  codebook = registry
+)
+
+enrollment$event_label <- gsub(
+  " - Month [0-9]{1,2}",
+  "",
+  enrollment$event_label
+)
+
+enrollment_tbl <- enrollment %>%
+  dplyr::mutate(
+    Year = format(as.Date(examdate), "%Y"),
+    Year = ifelse(is.na(Year), "Missing Exam Date", Year)
+  ) %>%
+  dplyr::group_by(Year) %>%
+  dplyr::count(event_label) %>%
+  tidyr::pivot_wider(
+    names_from = event_label,
+    values_from = n,
+    values_fill = 0
+  )
+
+data.frame(
+  Year = "Total",
+  Cycle = unique(enrollment$event_label),
+  Value = colSums(enrollment_tbl[2:4])
+) %>%
+  tidyr::pivot_wider(names_from = Cycle, values_from = Value) %>%
+  rbind(enrollment_tbl, .) %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::width(j = 1, width = 2.25) %>%
+  flextable::width(j = 2:4, width = 1)
+
+abcdsReporter:::format_quarto(type = "newpage")
+
+```
+
+
 ```{r retreiving demographics from atri}
 #| echo: false
 #| eval: !expr params$demographics
@@ -50,3 +100,5 @@ demographics %>%
 abcdsReporter:::format_quarto(type = "newpage")
 
 ```
+
+

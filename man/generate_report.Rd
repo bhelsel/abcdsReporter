@@ -4,12 +4,14 @@
 \alias{generate_report}
 \title{FUNCTION_TITLE}
 \usage{
-generate_report(..., outputdir)
+generate_report(..., outputdir, lonidir = NULL)
 }
 \arguments{
 \item{...}{PARAM_DESCRIPTION}
 
 \item{outputdir}{PARAM_DESCRIPTION}
+
+\item{lonidir}{PARAM_DESCRIPTION}
 }
 \value{
 OUTPUT_DESCRIPTION

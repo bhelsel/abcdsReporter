@@ -1,0 +1,61 @@
+
+```{r get karyotype data from atri}
+#| echo: false
+#| eval: !expr any(grepl("karyotype", names(params)))
+#| results: asis
+
+karyotype <- abcdsReporter::get_karyotype(
+  karyotype,
+  dataset = karyotype,
+  codebook = karyotype,
+  apply_labels = TRUE
+)
+
+```
+
+```{r add karyotype flextable}
+#| echo: false
+#| eval: !expr params$karyotype
+#| results: asis
+
+abcdsReporter:::format_quarto("Karyotype", "subsection")
+
+karyotype %>%
+  dplyr::count(karyotype) %>%
+  dplyr::filter(!is.na(karyotype) & karyotype != "Other") %>%
+  tidyr::pivot_wider(
+    names_from = karyotype,
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme()
+
+abcdsReporter:::format_quarto(type = "newpage")
+
+```
+
+```{r add karyotype by site flextable}
+#| echo: false
+#| eval: !expr params$karyotype_by_site
+#| results: asis
+
+abcdsReporter:::format_quarto("Karyotype by Site", "subsection")
+
+karyotype %>%
+  dplyr::group_by(Site = site_label) %>%
+  dplyr::count(karyotype) %>%
+  dplyr::filter(!is.na(karyotype) & karyotype != "Other") %>%
+  tidyr::pivot_wider(
+    names_from = karyotype,
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::width(j = 1, width = 2.25) %>%
+  flextable::width(j = 2:4, width = 1)
+
+abcdsReporter:::format_quarto(type = "newpage")
+
+```

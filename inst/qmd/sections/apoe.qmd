@@ -1,0 +1,24 @@
+
+
+```{r retrieving apoe data from loni on disk}
+#| echo: false
+#| eval: !expr (params$apoe) & (!is.null(params$lonidir))
+#| results: asis
+
+abcdsReporter:::format_quarto("APOE Data from LONI", type = "subsection")
+
+apoe <- abcds::read_apoe(params$lonidir, person = "participants")
+
+apoe %>%
+  dplyr::count(allele_combo) %>%
+  dplyr::mutate(
+    n = paste0(n, " (", round((n / nrow(apoe)) * 100, 2), "%)")
+  ) %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::set_header_labels(values = c("Allele Combination", "N (%)")) %>%
+  flextable::width(width = 5.4 / 2)
+
+abcdsReporter:::format_quarto(type = "newpage")
+
+```

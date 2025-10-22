@@ -1,6 +1,6 @@
-#' @title Retrieve Health-Related Variables from ABC-DS Data
+#' @title Retrieve Karyotype from ABC-DS Data
 #' @description
-#' Extracts one or more health-related variables from an ABC-DS dataset using the specified
+#' Extracts one or more karyotype variable from an ABC-DS dataset using the specified
 #' codebook. The function supports optional filtering by site and cycle and allows applying
 #' variable labels for enhanced interpretability.
 #'
@@ -24,7 +24,7 @@
 #' \dontrun{
 #' if (interactive()) {
 #'   # Retrieve selected health variables for a specific site and cycle
-#'   health_data <- get_health(
+#'   karyotype <- get_karyotype(
 #'     weight, height, blood_pressure,
 #'     dataset = abcds_health,
 #'     codebook = abcds_codebook,
@@ -39,11 +39,11 @@
 #' @seealso
 #'  \code{\link[rlang]{as_string}}, \code{\link[rlang]{defusing-advanced}},
 #'
-#' @rdname get_health
+#' @rdname get_karyotype
 #' @export
 #' @importFrom rlang as_string enexpr ensyms
 
-get_health <- function(
+get_karyotype <- function(
   ...,
   dataset,
   codebook,
