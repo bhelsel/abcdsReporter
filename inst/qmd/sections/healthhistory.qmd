@@ -9,12 +9,13 @@ healthhistory <- abcdsReporter::get_health(
   hh_hypothyroidism,
   hh_hyperlipidemia,
   hh_menopausal,
+  hh_diabetes,
+  hh_diabetes_type,
+  hh_hypertension,
   hh_asd,
   hh_vsd,
   hh_avcanal,
   hh_terfal,
-  dataset = healthhistory_,
-  codebook = healthhistory.csv,
   apply_labels = TRUE
 )
 
@@ -57,8 +58,23 @@ healthhistory %>%
 #| eval: !expr params$healthhistory
 #| results: asis
 
-hhvars <- c("hh_hypothyroidism", "hh_hyperlipidemia")
-hhvarlabels <- c("Hypothyroidism", "Hyperlipidemia")
+hhvars <- c(
+  "hh_hypothyroidism",
+  "hh_hyperlipidemia",
+  "hh_diabetes",
+  "hh_hypertension"
+)
+hhvarlabels <- c("Hypothyroidism", "Hyperlipidemia", "Diabetes", "Hypertension")
+
+type1 <- sum(healthhistory$hh_diabetes_type == "Type 1", na.rm = TRUE)
+type2 <- sum(healthhistory$hh_diabetes_type == "Type 2", na.rm = TRUE)
+diabetes_type <- paste0(
+  "Type 1 Diabetes (N = ",
+  type1,
+  "); Type 2 Diabetes (N = ",
+  type2,
+  ")"
+)
 
 healthhistory %>%
   dplyr::select(dplyr::all_of(hhvars)) %>%
@@ -84,7 +100,8 @@ healthhistory %>%
   ) %>%
   flextable::flextable() %>%
   abcdsReporter:::ft_add_abcds_theme() %>%
-  flextable::width(j = 1:5, width = 1.05)
+  flextable::width(j = 1:5, width = 1.05) %>%
+  flextable::add_footer_row(values = diabetes_type, colwidths = 5)
 
 ```
 
@@ -122,7 +139,79 @@ healthhistory %>%
   flextable::width(j = 2:3, width = 0.75) %>%
   flextable::width(j = 4, width = 1.75)
 
+```
+
+
+```{r get bmi by cycle}
+#| echo: false
+#| eval: !expr params$healthhistory
+#| results: asis
+
+exam <- abcdsReporter::get_exam(ht, htu, wt, wtu, apply_labels = TRUE)
+
+bmi <- exam %>%
+  dplyr::group_by(subject_label) %>%
+  dplyr::arrange(subject_label, event_code) %>%
+  tidyr::fill(ht, htu, .direction = "down") %>%
+  dplyr::filter(!is.na(ht) & !is.na(wt)) %>%
+  dplyr::ungroup() %>%
+  dplyr::mutate(
+    htcm = ifelse(htu == "Inches (in)", as.numeric(ht) * 2.54, as.numeric(ht)),
+    htin = htcm / 2.54,
+    wtkg = ifelse(
+      wtu == "Pounds (lbs)",
+      as.numeric(wt) / 2.205,
+      as.numeric(wt)
+    ),
+    wtlbs = wtkg * 2.205,
+    bmi = wtkg / (htcm / 100)^2,
+    bmi_name = dplyr::case_when(
+      bmi < 18.5 ~ "Underweight",
+      bmi >= 18.5 & bmi < 25 ~ "Normal Weight",
+      bmi >= 25 & bmi < 30 ~ "Overweight",
+      bmi >= 30 ~ "Obese"
+    ),
+    bmi_cat = 1L
+  ) %>%
+  tidyr::pivot_wider(
+    names_from = bmi_name,
+    values_from = bmi_cat,
+    values_fill = 0L
+  ) %>%
+  dplyr::select(-c(ht, htu, wt, wtu))
+
+bmi$event_label <- gsub(" - Month [0-9]{1,2}", "", bmi$event_label)
+
+
+variables <- list(
+  "Height (cm)" = "htcm",
+  "Height (in)" = "htin",
+  "Weight (kg)" = "wtkg",
+  "Weight (lbs)" = "wtlbs",
+  "BMI" = "bmi"
+)
+
+bmi %>%
+  dplyr::group_by(Cycle = event_label) %>%
+  dplyr::mutate(Total = 1L) %>%
+  dplyr::summarise_at(dplyr::vars(htcm:Total), sum) %>%
+  dplyr::mutate_at(dplyr::vars(htcm:bmi), .funs = function(x) {
+    round(x / .$Total, 1)
+  }) %>%
+  dplyr::mutate_all(as.character) %>%
+  dplyr::rename(!!!variables) %>%
+  dplyr::mutate(Cycle = paste0(Cycle, " \n(N = ", Total, ")"), Total = NULL) %>%
+  tidyr::pivot_longer(
+    cols = `Height (cm)`:Underweight,
+    names_to = "Variable"
+  ) %>%
+  tidyr::pivot_wider(names_from = Cycle) %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::width(width = 5.3 / 4)
 
 abcdsReporter:::format_quarto(type = "newpage")
 
 ```
+
+
