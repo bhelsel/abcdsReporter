@@ -6,8 +6,6 @@
 
 karyotype <- abcdsReporter::get_karyotype(
   karyotype,
-  dataset = karyotype,
-  codebook = karyotype,
   apply_labels = TRUE
 )
 
