@@ -9,8 +9,7 @@ abcdsReporter:::format_quarto("Enrollment by Cycle", "subsection")
 
 enrollment <- abcdsReporter::get_registry(
   examdate,
-  dataset = registry,
-  codebook = registry
+  apply_labels = TRUE
 )
 
 enrollment$event_label <- gsub(
