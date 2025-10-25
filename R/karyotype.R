@@ -5,8 +5,6 @@
 #' variable labels for enhanced interpretability.
 #'
 #' @param ... One or more unquoted variable names to retrieve from the dataset.
-#' @param dataset A symbol or string specifying the dataset name within the ABC-DS data repository.
-#' @param codebook A symbol or string specifying the corresponding codebook to use for metadata.
 #' @param site Optional; a site identifier or vector of site codes to subset data by site. Default is `NULL`.
 #' @param cycle Optional; a cycle identifier or vector of cycles to subset data by cycle. Default is `NULL`.
 #' @param apply_labels Logical; if `TRUE`, applies variable labels from the codebook to the returned data. Default is `FALSE`.
@@ -25,9 +23,7 @@
 #' if (interactive()) {
 #'   # Retrieve selected health variables for a specific site and cycle
 #'   karyotype <- get_karyotype(
-#'     weight, height, blood_pressure,
-#'     dataset = abcds_health,
-#'     codebook = abcds_codebook,
+#'     karyotype,
 #'     site = "Site01",
 #'     cycle = "Cycle2",
 #'     apply_labels = TRUE
@@ -45,18 +41,14 @@
 
 get_karyotype <- function(
   ...,
-  dataset,
-  codebook,
   site = NULL,
   cycle = NULL,
   apply_labels = FALSE
 ) {
-  dataset <- rlang::as_string(rlang::enexpr(dataset))
-  codebook <- rlang::as_string(rlang::enexpr(codebook))
   variables <- as.character(rlang::ensyms(...))
   get_abcds_data(
-    dataset,
-    codebook,
+    dataset = karyotype,
+    codebook = karyotype,
     variables,
     site = site,
     cycle = cycle,

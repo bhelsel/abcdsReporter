@@ -25,16 +25,13 @@
 #' if (interactive()) {
 #'   # Retrieve selected health variables for a specific site and cycle
 #'   health_data <- get_health(
-#'     weight, height, blood_pressure,
-#'     dataset = abcds_health,
-#'     codebook = abcds_codebook,
+#'     hh_diabetes, hh_hypertension,
 #'     site = "Site01",
 #'     cycle = "Cycle2",
 #'     apply_labels = TRUE
 #'   )
 #' }
 #' }
-#'
 #'
 #' @seealso
 #'  \code{\link[rlang]{as_string}}, \code{\link[rlang]{defusing-advanced}},
@@ -45,18 +42,14 @@
 
 get_health <- function(
   ...,
-  dataset,
-  codebook,
   site = NULL,
   cycle = NULL,
   apply_labels = FALSE
 ) {
-  dataset <- rlang::as_string(rlang::enexpr(dataset))
-  codebook <- rlang::as_string(rlang::enexpr(codebook))
   variables <- as.character(rlang::ensyms(...))
   get_abcds_data(
-    dataset,
-    codebook,
+    dataset = healthhistory_,
+    codebook = healthhistory.csv,
     variables,
     site = site,
     cycle = cycle,

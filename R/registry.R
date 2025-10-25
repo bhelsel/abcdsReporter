@@ -43,18 +43,14 @@
 
 get_registry <- function(
   ...,
-  dataset,
-  codebook,
   site = NULL,
   cycle = NULL,
   apply_labels = FALSE
 ) {
-  dataset <- rlang::as_string(rlang::enexpr(dataset))
-  codebook <- rlang::as_string(rlang::enexpr(codebook))
   variables <- as.character(rlang::ensyms(...))
   get_abcds_data(
-    dataset,
-    codebook,
+    dataset = registry,
+    codebook = registry,
     variables,
     site = site,
     cycle = cycle,
