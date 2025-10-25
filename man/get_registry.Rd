@@ -4,27 +4,20 @@
 \alias{get_registry}
 \title{Retrieve Registry Variables from ABC-DS Data}
 \usage{
-get_registry(
-  ...,
-  dataset,
-  codebook,
-  site = NULL,
-  cycle = NULL,
-  apply_labels = FALSE
-)
+get_registry(..., site = NULL, cycle = NULL, apply_labels = FALSE)
 }
 \arguments{
 \item{...}{One or more unquoted variable names to retrieve from the dataset.}
-
-\item{dataset}{A symbol or string specifying the dataset name within the ABC-DS data repository.}
-
-\item{codebook}{A symbol or string specifying the corresponding codebook to use for metadata.}
 
 \item{site}{Optional; a site identifier or vector of site codes to subset data by site. Default is \code{NULL}.}
 
 \item{cycle}{Optional; a cycle identifier or vector of cycles to subset data by cycle. Default is \code{NULL}.}
 
 \item{apply_labels}{Logical; if \code{TRUE}, applies variable labels from the codebook to the returned data. Default is \code{FALSE}.}
+
+\item{dataset}{A symbol or string specifying the dataset name within the ABC-DS data repository.}
+
+\item{codebook}{A symbol or string specifying the corresponding codebook to use for metadata.}
 }
 \value{
 A data frame containing the selected variables and any applied filters (site and/or cycle).

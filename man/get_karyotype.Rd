@@ -4,21 +4,10 @@
 \alias{get_karyotype}
 \title{Retrieve Karyotype from ABC-DS Data}
 \usage{
-get_karyotype(
-  ...,
-  dataset,
-  codebook,
-  site = NULL,
-  cycle = NULL,
-  apply_labels = FALSE
-)
+get_karyotype(..., site = NULL, cycle = NULL, apply_labels = FALSE)
 }
 \arguments{
 \item{...}{One or more unquoted variable names to retrieve from the dataset.}
-
-\item{dataset}{A symbol or string specifying the dataset name within the ABC-DS data repository.}
-
-\item{codebook}{A symbol or string specifying the corresponding codebook to use for metadata.}
 
 \item{site}{Optional; a site identifier or vector of site codes to subset data by site. Default is \code{NULL}.}
 
@@ -45,9 +34,7 @@ tidy evaluation, allowing unquoted variable names and symbol references.
 if (interactive()) {
   # Retrieve selected health variables for a specific site and cycle
   karyotype <- get_karyotype(
-    weight, height, blood_pressure,
-    dataset = abcds_health,
-    codebook = abcds_codebook,
+    karyotype,
     site = "Site01",
     cycle = "Cycle2",
     apply_labels = TRUE
