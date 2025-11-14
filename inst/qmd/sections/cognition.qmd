@@ -1,0 +1,96 @@
+```{r retreiving the done variables from the cognition tasks for atri and loni}
+#| echo: false
+#| eval: !expr params$cognition_task_counts
+#| results: asis
+
+cognition_map <-
+  tibble::tribble(
+    ~atri_task_names , ~loni_variable_names , ~cognition_labels          ,
+    "recall"         , "crtt_done"          , "Cued Recall"              ,
+    "dsmse"          , "dsmse_done"         , "DS Mental Status Exam"    ,
+    "vmi"            , "vmi_done"           , "Visual-Motor Integration" ,
+    "pegboard"       , "pp_done"            , "Purdue Pegboard"          ,
+    "radd"           , "cogradd_done"       , "RADD"                     ,
+    "blockhaxby"     , "cogblockhaxby_done" , "Haxby Block Design"       ,
+    "blockwisc"      , "cogblockwisc_done"  , "Wisconsin Block Design"   ,
+    "catdog"         , "cadt_done"          , "Stroop Dog and Cat"       ,
+    "verbal"         , "cogverbal_done"     , "Verbal Fluency"           ,
+  )
+
+cognition <- purrr::map2(
+  cognition_map[["atri_task_names"]],
+  cognition_map[["loni_variable_names"]],
+  .f = function(x, y) {
+    cog <- abcdsReporter::get_cognition(done, task = x)
+    dplyr::rename(cog, !!y := "done")
+  }
+)
+
+id_vars <- abcdsReporter:::get_ids(cognition[[1]])
+
+atri_cognition <- purrr::reduce(cognition, dplyr::full_join, by = id_vars)
+
+atri_cognition$ids <- atri_cognition$subject_label
+
+if (!is.null(params$lonidir)) {
+  loni_cognition <- abcds::read_cognitive(
+    Sys.getenv("ABCDS_LONI_DATA_DIRECTORY"),
+    person = "participants"
+  )
+
+  loni_cognition <- loni_cognition[c(
+    "subject_label",
+    "event_sequence",
+    cognition_map[["loni_variable_names"]]
+  )]
+
+  atri_cognition <- abcdsReporter:::loni_join(
+    atri_data = atri_cognition,
+    loni_data = loni_cognition,
+    variables = cognition_variables
+  )
+}
+
+```
+
+
+```{r add flextable for cognition_task_counts to display the number of participants with multiple visits}
+#| echo: false
+#| eval: !expr params$cognition_task_counts
+#| results: asis
+
+abcdsReporter:::format_quarto(
+  "Number of Participants with Completed Cognition Tasks",
+  "subsection"
+)
+
+cognition_tasks <- abcdsReporter::multiple_count_by(
+  data = atri_cognition,
+  names = cognition_map[["loni_variable_names"]],
+  labels = cognition_map[["cognition_labels"]],
+  ids = "ids",
+  varname = "Cognition Task"
+)
+
+cogtime <- as.numeric(colnames(cognition_tasks)[
+  2:ncol(cognition_tasks)
+])
+
+cognition_tasks_footnote <- paste(
+  glue::glue("Numbers {min(cogtime)} to {max(cogtime)}"),
+  "show how many participants completed at least that many visits."
+)
+
+cognition_tasks %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::add_footer_row(
+    values = cognition_tasks_footnote,
+    colwidths = ncol(cognition_tasks)
+  ) %>%
+  flextable::width(j = 1, width = 1.5) %>%
+  flextable::width(j = 2:(max(cogtime) + 1), width = 3.5 / max(cogtime))
+
+abcdsReporter:::format_quarto(type = "newpage")
+
+```

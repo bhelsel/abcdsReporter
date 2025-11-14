@@ -25,11 +25,14 @@ author:
 
 library(magrittr)
 
+# params <- yaml::read_yaml('/Users/bhelsel/Desktop/ABC-DS Reports/_variables.yaml')
 params <- yaml::read_yaml("_variables.yaml")
 
 ```
 
 {{< include sections/demographics.qmd >}}
+
+{{< include sections/cognition.qmd >}}
 
 {{< include sections/imaging.qmd >}}
 
@@ -41,5 +44,5 @@ params <- yaml::read_yaml("_variables.yaml")
 
 {{< include sections/karyotype.qmd >}}
 
-{{< include sections/omics.qmd >}}
+{{< include sections/fluids.qmd >}}
 

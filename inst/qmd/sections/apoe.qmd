@@ -2,12 +2,15 @@
 
 ```{r retrieving apoe data from loni on disk}
 #| echo: false
-#| eval: !expr (params$apoe) & (!is.null(params$lonidir))
+#| eval: !expr params$apoe
 #| results: asis
 
 abcdsReporter:::format_quarto("APOE Data from LONI", type = "subsection")
 
-apoe <- abcds::read_apoe(params$lonidir, person = "participants")
+apoe <- abcds::read_apoe(
+  Sys.getenv("ABCDS_LONI_DATA_DIRECTORY"),
+  person = "participants"
+)
 
 apoe %>%
   dplyr::count(allele_combo) %>%

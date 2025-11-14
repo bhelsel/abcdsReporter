@@ -4,7 +4,13 @@
 \alias{get_demographics}
 \title{Retrieve and Format ABC-DS Demographic Data}
 \usage{
-get_demographics(..., site = NULL, cycle = NULL, apply_labels = FALSE)
+get_demographics(
+  ...,
+  site = NULL,
+  cycle = NULL,
+  apply_labels = FALSE,
+  controls = FALSE
+)
 }
 \arguments{
 \item{...}{One or more unquoted variable names to select from the demographics
@@ -18,6 +24,8 @@ defaults to \code{NULL}, returning all cycles.}
 
 \item{apply_labels}{Logical. Whether to apply variable and factor labels from
 the ABC-DS data dictionary. Defaults to \code{FALSE}.}
+
+\item{controls}{A boolean value that indicates whether the function should return the controls, Default: FALSE}
 }
 \value{
 A \code{\link[tibble]{tibble}} containing selected demographic variables,

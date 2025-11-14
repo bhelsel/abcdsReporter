@@ -159,21 +159,24 @@ apply_factor_labels <- function(data, dictionary) {
   }) %>%
     `names<-`(., dictionary$field_name)
 
+  check_all <- c("de_race", "mrseqs")
+
   for (i in names(data)) {
     if (i %in% names(dictionary)) {
-      if (i == "de_race") {
+      if (i %in% check_all) {
         data <- split_factor_labels(
           data,
+          !!i,
           dictionary,
-          de_race,
           delim = "|"
         )
+      } else {
+        data[[i]] <- factor(
+          data[[i]],
+          levels = dictionary[[i]]$levels,
+          labels = trimws(dictionary[[i]]$labels)
+        )
       }
-      data[[i]] <- factor(
-        data[[i]],
-        levels = dictionary[[i]]$levels,
-        labels = dictionary[[i]]$labels
-      )
     }
   }
 

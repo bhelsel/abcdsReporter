@@ -1,49 +1,3 @@
-#' @title Flexible Join for dplyr
-#'
-#' @description
-#' Performs a flexible join on two data frames using any \code{dplyr} join function
-#' specified by the user. Supports joins specified as a string, symbol, or function.
-#'
-#' @inheritParams dplyr::full_join
-#' @param join_type The type of \code{dplyr} join to perform. Can be a string
-#'   (e.g., "inner_join"), a symbol (e.g., \code{inner_join}), or a function
-#'   (e.g., \code{dplyr::inner_join}).
-#' @param ... Additional arguments passed to the chosen \code{dplyr} join function.
-#'
-#' @return
-#' A \code{\link[tibble]{tibble}} containing the joined data.
-#'
-#' @details
-#' This function allows flexible selection of join type while joining two data
-#' frames. It evaluates the provided \code{join_type} and applies it with any
-#' additional arguments passed via \code{...}. Useful for programmatically
-#' performing joins in pipelines.
-#'
-#' @seealso
-#'  \code{\link[rlang]{sym}}, \code{\link[rlang]{eval_tidy}},
-#'  \code{\link[rlang]{is_symbol}}, \code{\link[rlang]{is_call}},
-#'  \code{\link[rlang]{abort}}, \code{\link[dplyr]{inner_join}},
-#'  \code{\link[dplyr]{left_join}}, \code{\link[dplyr]{full_join}},
-#'  \code{\link[dplyr]{right_join}}
-#'
-#' @rdname atri_join
-#' @export
-#' @importFrom rlang sym eval_tidy is_symbol is_call abort
-
-atri_join <- function(x, y, by, join_type, ...) {
-  join_fn <- tryCatch(
-    {
-      join_type <- rlang::ensym(join_type)
-      rlang::eval_tidy(join_type, env = asNamespace("dplyr"))
-    },
-    error = function(e) {
-      rlang::eval_tidy(join_type)
-    }
-  )
-
-  join_fn(x, y, by = by, ...)
-}
-
 #' @title Collapse a Character Vector with 'and'
 #'
 #' @description
@@ -242,8 +196,8 @@ to_snake_case <- function(x) {
 #' into separate binary columns for each level using a dictionary.
 #'
 #' @param data A data frame containing the variable to split.
-#' @param dictionary A list containing the levels and labels for the variable.
 #' @param variable The variable in \code{data} to split (unquoted).
+#' @param dictionary A list containing the levels and labels for the variable, Default: NULL.
 #' @param delim A character string used to separate multiple values in the variable.
 #'   Default: \code{"|"}.
 #'
@@ -265,7 +219,12 @@ to_snake_case <- function(x) {
 #' @rdname split_factor_labels
 #' @keywords internal
 
-split_factor_labels <- function(data, dictionary, variable, delim = "|") {
+split_factor_labels <- function(
+  data,
+  variable,
+  dictionary = NULL,
+  delim = "|"
+) {
   variable <- as.character(rlang::ensym(variable))
   ids <- get_ids(data)
 
@@ -277,11 +236,13 @@ split_factor_labels <- function(data, dictionary, variable, delim = "|") {
     delim = delim
   )
 
-  data[[variable]] <- factor(
-    data[[variable]],
-    levels = dictionary[[variable]]$levels,
-    labels = dictionary[[variable]]$labels
-  )
+  if (!is.null(dictionary)) {
+    data[[variable]] <- factor(
+      data[[variable]],
+      levels = dictionary[[variable]]$levels,
+      labels = trimws(dictionary[[variable]]$labels)
+    )
+  }
 
   data$value <- 1L
 
@@ -356,4 +317,22 @@ format_quarto <- function(x = NULL, type) {
   } else if (type == "newpage") {
     cat("\\newpage")
   }
+}
+
+#' @title Retrieve the identifiers for the sibling controls
+#' @description Retrieve Sibling Identifiers
+#' @return A character vector containing a list of sibling identifiers
+#' @details Retrieve Sibling Identifiers
+#' @rdname get_sibling_controls
+#' @export
+
+get_sibling_controls <- function() {
+  files <- get_atri_files(abcds, edc, crf_data_exclude_phi, latest)
+  data <- import_atri_file(abcds, files, control)
+  sibling_control_identifiers <- data[
+    data$dd_field_name == "sibptid1",
+    "dd_revision_field_value",
+    drop = TRUE
+  ]
+  return(sibling_control_identifiers)
 }

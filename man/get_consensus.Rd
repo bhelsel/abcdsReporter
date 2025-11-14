@@ -4,16 +4,28 @@
 \alias{get_consensus}
 \title{FUNCTION_TITLE}
 \usage{
-get_consensus(..., site = NULL, cycle = NULL, apply_labels = FALSE)
+get_consensus(
+  ...,
+  site = NULL,
+  cycle = NULL,
+  apply_labels = FALSE,
+  controls = FALSE
+)
 }
 \arguments{
-\item{...}{PARAM_DESCRIPTION}
+\item{...}{One or more unquoted variable names to retrieve from the dataset.}
 
-\item{site}{PARAM_DESCRIPTION, Default: NULL}
+\item{site}{Optional; a site identifier or vector of site codes to subset data by site. Default is \code{NULL}.}
 
-\item{cycle}{PARAM_DESCRIPTION, Default: NULL}
+\item{cycle}{Optional; a cycle identifier or vector of cycles to subset data by cycle. Default is \code{NULL}.}
 
-\item{apply_labels}{PARAM_DESCRIPTION, Default: FALSE}
+\item{apply_labels}{Logical; if \code{TRUE}, applies variable labels from the codebook to the returned data. Default is \code{FALSE}.}
+
+\item{controls}{A boolean value that indicates whether the function should return the controls, Default is \code{FALSE}}
+
+\item{dataset}{A symbol or string specifying the dataset name within the ABC-DS data repository.}
+
+\item{codebook}{A symbol or string specifying the corresponding codebook to use for metadata.}
 }
 \value{
 OUTPUT_DESCRIPTION
@@ -23,13 +35,6 @@ FUNCTION_DESCRIPTION
 }
 \details{
 DETAILS
-}
-\examples{
-\dontrun{
-if(interactive()){
- #EXAMPLE1
- }
-}
 }
 \seealso{
 \code{\link[rlang]{defusing-advanced}}

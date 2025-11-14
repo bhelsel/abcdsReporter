@@ -78,7 +78,7 @@ generate_report <- function(..., outputdir, lonidir = NULL) {
   )
 
   files <- list.files(reportdir, full.names = TRUE)
-  non_pdf_files <- files[!grepl("\\.pdf$", files, ignore.case = TRUE)]
+  non_pdf_files <- files[!grepl("\\.pdf$|\\.yaml$", files, ignore.case = TRUE)]
 
   invisible(unlink(non_pdf_files, recursive = TRUE))
 

@@ -4,7 +4,13 @@
 \alias{get_exam}
 \title{Retrieve Physical and Neurological Exam Variables from ABC-DS Data}
 \usage{
-get_exam(..., site = NULL, cycle = NULL, apply_labels = FALSE)
+get_exam(
+  ...,
+  site = NULL,
+  cycle = NULL,
+  apply_labels = FALSE,
+  controls = FALSE
+)
 }
 \arguments{
 \item{...}{One or more unquoted variable names to retrieve from the dataset.}
@@ -14,6 +20,8 @@ get_exam(..., site = NULL, cycle = NULL, apply_labels = FALSE)
 \item{cycle}{Optional; a cycle identifier or vector of cycles to subset data by cycle. Default is \code{NULL}.}
 
 \item{apply_labels}{Logical; if \code{TRUE}, applies variable labels from the codebook to the returned data. Default is \code{FALSE}.}
+
+\item{controls}{A boolean value that indicates whether the function should return the controls, Default is \code{FALSE}}
 }
 \value{
 A data frame containing the selected variables and any applied filters (site and/or cycle).

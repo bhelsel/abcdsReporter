@@ -27,7 +27,8 @@ karyotype %>%
     values_fill = 0
   ) %>%
   flextable::flextable() %>%
-  abcdsReporter:::ft_add_abcds_theme()
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::width(width = 5.25 / 3)
 
 abcdsReporter:::format_quarto(type = "newpage")
 

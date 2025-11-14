@@ -9,7 +9,8 @@ get_imaging(
   site = NULL,
   cycle = NULL,
   apply_labels = FALSE,
-  imaging = c("amymeta", "fdgmeta", "mrimeta")
+  controls = FALSE,
+  imaging = c("amymeta", "taumeta", "fdgmeta", "mrimeta")
 )
 }
 \arguments{
@@ -23,6 +24,8 @@ Defaults to \code{NULL}, returning all cycles.}
 
 \item{apply_labels}{Logical. Whether to apply variable and factor labels from
 the ABC-DS data dictionary. Defaults to \code{FALSE}.}
+
+\item{controls}{A boolean value that indicates whether the function should return the controls, Default is \code{FALSE}}
 
 \item{imaging}{Character. The imaging dataset to retrieve. Must be one of
 \code{"amymeta"}, \code{"fdgmeta"}, or \code{"mrimeta"}. Defaults to

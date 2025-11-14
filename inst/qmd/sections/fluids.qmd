@@ -1,0 +1,177 @@
+
+```{r getting blood metadata from atri and loni for completed scans}
+#| echo: false
+#| eval: !expr params$blood
+#| results: asis
+
+abcdsReporter:::format_quarto("Blood Draw Data", type = "subsection")
+
+atri_blood <- abcdsReporter::get_blood(done)
+colnames(atri_blood)[which(colnames(atri_blood) == "done")] <- "paxdone"
+
+id_vars <- abcdsReporter:::get_ids(atri_blood)
+atri_blood$ids <- atri_blood$subject_label
+
+loni_blood <- readr::read_csv(
+  list.files(
+    Sys.getenv("ABCDS_LONI_DATA_DIRECTORY"),
+    pattern = "Sample_Collection_-_Blood_15Oct2025.csv",
+    full.names = TRUE
+  ),
+  show_col_types = FALSE
+)
+
+atri_blood <- abcdsReporter:::loni_join(
+  atri_data = atri_blood,
+  loni_data = loni_blood,
+  variables = "paxdone"
+)
+
+blood_counts <- abcdsReporter::count_by(
+  data = atri_blood,
+  id = ids,
+  column = paxdone
+)
+
+bloodtime <- as.numeric(colnames(blood_counts)[
+  2:ncol(blood_counts)
+])
+
+blood_counts_footnote <- paste(
+  glue::glue("Numbers {min(bloodtime)} to {max(bloodtime)}"),
+  "show how many participants completed at least that many blood draws."
+)
+
+blood_counts %>%
+  dplyr::rename(`Blood Draw` = variable) %>%
+  dplyr::mutate(`Blood Draw` = "Count") %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::add_footer_row(
+    values = blood_counts_footnote,
+    colwidths = ncol(blood_counts)
+  ) %>%
+  flextable::width(j = 1, width = 2) %>%
+  flextable::width(j = 2:(max(bloodtime) + 1), width = 3.25 / max(bloodtime))
+
+```
+
+
+
+```{r getting csf metadata from atri and loni for completed scans}
+#| echo: false
+#| eval: !expr params$csf
+#| results: asis
+
+abcdsReporter:::format_quarto("CSF Spinal Tap", type = "subsection")
+
+atri_csf <- abcdsReporter::get_csf(done)
+colnames(atri_csf)[which(colnames(atri_csf) == "done")] <- "paxdone"
+
+id_vars <- abcdsReporter:::get_ids(atri_csf)
+atri_csf$ids <- atri_csf$subject_label
+
+loni_csf <- readr::read_csv(
+  list.files(
+    Sys.getenv("ABCDS_LONI_DATA_DIRECTORY"),
+    pattern = "Sample_Collection_-_CSF_15Oct2025.csv",
+    full.names = TRUE
+  ),
+  show_col_types = FALSE
+)
+
+atri_csf <- abcdsReporter:::loni_join(
+  atri_data = atri_csf,
+  loni_data = loni_csf,
+  variables = "csf_done"
+)
+
+csf_counts <- abcdsReporter::count_by(
+  data = atri_csf,
+  id = ids,
+  column = csf_done
+)
+
+csftime <- as.numeric(colnames(csf_counts)[
+  2:ncol(csf_counts)
+])
+
+csf_counts_footnote <- paste(
+  glue::glue("Numbers {min(csftime)} to {max(csftime)}"),
+  "show how many participants completed at least that many blood draws."
+)
+
+csf_counts %>%
+  dplyr::rename(`CSF Spinal Tap` = variable) %>%
+  dplyr::mutate(`CSF Spinal Tap` = "Count") %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::add_footer_row(
+    values = csf_counts_footnote,
+    colwidths = ncol(csf_counts)
+  ) %>%
+  flextable::width(j = 1, width = 2) %>%
+  flextable::width(j = 2:(max(csftime) + 1), width = 3.25 / max(csftime))
+
+
+```
+
+
+```{r get omics data from loni}
+#| echo: false
+#| eval: !expr params$omics
+#| results: asis
+
+abcdsReporter:::format_quarto("Omics Data from LONI", type = "subsection")
+
+metabolomics <- readr::read_csv(
+  list.files(
+    Sys.getenv("ABCDS_LONI_DATA_DIRECTORY"),
+    pattern = "ABCDS_targeted_metabolomics_unadjusted",
+    full.names = TRUE
+  ),
+  show_col_types = FALSE
+)
+
+proteomics <- readr::read_csv(
+  list.files(
+    Sys.getenv("ABCDS_LONI_DATA_DIRECTORY"),
+    pattern = "ABCDS_Proteomics_Results_Freeze5_15Oct2025",
+    full.names = TRUE
+  ),
+  show_col_types = FALSE
+)
+
+proteomics_tbl <- proteomics %>%
+  dplyr::filter(!is.na(subject_label)) %>%
+  dplyr::distinct(subject_label, event_sequence) %>%
+  dplyr::group_by(event_sequence) %>%
+  dplyr::count() %>%
+  dplyr::mutate(
+    `Omics Type` = "Proteomics",
+    event_sequence = paste0("Event Sequence ", event_sequence)
+  )
+
+
+metabolomics_tbl <- metabolomics %>%
+  dplyr::distinct(subject_label, event_sequence) %>%
+  dplyr::group_by(event_sequence) %>%
+  dplyr::count() %>%
+  dplyr::mutate(
+    `Omics Type` = "Metabolomics",
+    event_sequence = paste0("Event Sequence ", event_sequence)
+  )
+
+proteomics_tbl %>%
+  rbind(metabolomics_tbl) %>%
+  dplyr::rename(`Event Sequence` = event_sequence) %>%
+  tidyr::pivot_wider(
+    names_from = `Omics Type`,
+    values_from = n,
+    values_fill = 0
+  ) %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::width(width = 5.25 / 3)
+
+```

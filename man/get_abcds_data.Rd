@@ -10,7 +10,8 @@ get_abcds_data(
   variables,
   site = NULL,
   cycle = NULL,
-  apply_labels = FALSE
+  apply_labels = FALSE,
+  controls = FALSE
 )
 }
 \arguments{

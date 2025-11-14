@@ -13,6 +13,7 @@
 #' defaults to \code{NULL}, returning all cycles.
 #' @param apply_labels Logical. Whether to apply variable and factor labels from
 #' the ABC-DS data dictionary. Defaults to \code{FALSE}.
+#' @param controls A boolean value that indicates whether the function should return the controls, Default: FALSE
 #'
 #' @return
 #' A \code{\link[tibble]{tibble}} containing selected demographic variables,
@@ -63,46 +64,19 @@ get_demographics <- function(
   ...,
   site = NULL,
   cycle = NULL,
-  apply_labels = FALSE
+  apply_labels = FALSE,
+  controls = FALSE
 ) {
   variables <- as.character(rlang::ensyms(...))
-  files <- get_atri_files(abcds, edc, crf_data_exclude_phi, latest)
-  data <- import_atri_file(abcds, files, ptdemog)
-
-  ids <- get_ids(data)
-
-  demographics <- data[data$dd_field_name %in% as.character(variables), ]
-
-  if (!is.null(site)) {
-    demographics <- filter_by_site(demographics, site)
-  }
-
-  if (!is.null(cycle)) {
-    demographics <- filter_by_cycle(demographics, cycle)
-  }
-
-  demographics <- tidyr::pivot_wider(
-    demographics,
-    id_cols = ids,
-    names_from = dd_field_name,
-    values_from = dd_revision_field_value
+  get_abcds_data(
+    dataset = ptdemog,
+    codebook = ptdemog,
+    variables,
+    site = site,
+    cycle = cycle,
+    apply_labels = apply_labels,
+    controls = controls
   )
-
-  if ("age_at_visit" %in% variables) {
-    age_at_visit <- calculate_age_at_visit(data, site, cycle)
-    demographics <- atri_join(
-      x = demographics,
-      y = age_at_visit,
-      by = ids,
-      join_type = full_join
-    )
-  }
-
-  if (apply_labels) {
-    demographics <- apply_labels(demographics, abcds, ptdemog)
-  }
-
-  return(demographics)
 }
 
 #' @title Retrieve Year of Birth from ABC-DS Data

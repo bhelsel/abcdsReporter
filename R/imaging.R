@@ -13,6 +13,7 @@
 #'   Defaults to \code{NULL}, returning all cycles.
 #' @param apply_labels Logical. Whether to apply variable and factor labels from
 #'   the ABC-DS data dictionary. Defaults to \code{FALSE}.
+#' @param controls A boolean value that indicates whether the function should return the controls, Default is `FALSE`
 #' @param imaging Character. The imaging dataset to retrieve. Must be one of
 #'   \code{"amymeta"}, \code{"fdgmeta"}, or \code{"mrimeta"}. Defaults to
 #'   \code{c("amymeta", "fdgmeta", "mrimeta")}, and the first matching option
@@ -67,36 +68,132 @@ get_imaging <- function(
     site = NULL,
     cycle = NULL,
     apply_labels = FALSE,
-    imaging = c("amymeta", "fdgmeta", "mrimeta")
+    controls = FALSE,
+    imaging = c("amymeta", "taumeta", "fdgmeta", "mrimeta")
 ) {
     variables <- as.character(rlang::ensyms(...))
     imaging <- match.arg(imaging)
-    files <- get_atri_files(abcds, edc, crf_data_exclude_phi, latest)
-    data <- import_atri_file(abcds, files, !!imaging)
-
-    imaging_data <- data[data$dd_field_name %in% as.character(variables), ]
-
-    if (!is.null(site)) {
-        imaging_data <- filter_by_site(imaging_data, site)
-    }
-
-    if (!is.null(cycle)) {
-        imaging_data <- filter_by_cycle(imaging_data, cycle)
-    }
-
-    ids <- get_ids(data)
-
-    imaging_data <- tidyr::pivot_wider(
-        imaging_data,
-        id_cols = ids,
-        names_from = dd_field_name,
-        values_from = dd_revision_field_value,
-        values_fn = max
+    get_abcds_data(
+        dataset = !!imaging,
+        codebook = !!imaging,
+        variables,
+        site = site,
+        cycle = cycle,
+        apply_labels = apply_labels,
+        controls = controls
     )
+}
 
-    if (apply_labels) {
-        imaging_data <- apply_labels(imaging_data, abcds, !!imaging)
+#' Get MRI Sequence Data
+#'
+#' Retrieves and processes MRI sequence metadata from the ABCDS imaging data,
+#' including information about which MRI sequences were completed. The function
+#' converts sequence descriptions to abbreviated codes, creates binary indicators
+#' for each sequence type, and reconstructs a coded sequence string.
+#'
+#' @param name Character string specifying the column naming convention for MRI
+#'   sequence types. Options are:
+#'   \itemize{
+#'     \item \code{"abbreviation"} (default) - Uses short abbreviated names
+#'       (e.g., "T1", "FLAIR", "DTI")
+#'     \item \code{"description"} - Uses full descriptive names
+#'       (e.g., "T1 MPRAGE/ISSPGR", "3D FLAIR")
+#'   }
+#'
+#' @return A tibble containing MRI sequence data with the following components:
+#'   \itemize{
+#'     \item Standard imaging metadata columns (subject identifiers, dates, etc.)
+#'     \item \code{mri_done} - Numeric indicator of MRI completion status
+#'     \item \code{mrseqs} - Pipe-separated string of sequence numbers (e.g., "1|3|5")
+#'       indicating which sequences were performed, where numbers correspond to:
+#'       1 = T1 MPRAGE, 2 = 3D FLAIR, 3 = T2*/SWI, 4 = DTI, 5 = ASL,
+#'       6 = T2 FSE, 7 = rs-fMRI
+#'     \item Binary columns for each MRI sequence type (0/1 indicating
+#'       presence/absence), with names determined by the \code{name} parameter
+#'   }
+#'
+#' @details
+#' The function performs several data processing steps:
+#' \enumerate{
+#'   \item Retrieves raw MRI metadata from the imaging database
+#'   \item Renames the \code{done} column to \code{mri_done} for clarity
+#'   \item Converts full sequence descriptions in \code{mrseqs} to abbreviated
+#'     codes using the internal \code{.mri_sequence_key} lookup table
+#'   \item Removes extraneous whitespace around pipe delimiters
+#'   \item Splits the pipe-delimited sequence string into separate binary columns
+#'   \item Reorders columns to place sequence indicators at the end
+#'   \item Reconstructs the \code{mrseqs} column as numeric codes (1-7)
+#'     separated by pipes, based on which binary indicators equal 1
+#'   \item Optionally converts abbreviated column names back to full descriptions
+#' }
+#'
+#' The function relies on an internal \code{.mri_sequence_key} data structure
+#' that maps between sequence descriptions, abbreviations, and numeric codes.
+#'
+#' @examples
+#' \dontrun{
+#' # Get MRI sequences with abbreviated column names
+#' mri_data <- get_mri_sequences()
+#'
+#' # Get MRI sequences with full descriptive column names
+#' mri_data <- get_mri_sequences(name = "description")
+#'
+#' # Check which sequences a participant completed
+#' subset(mri_data, subject_label == "12345", select = c(subject_label, mrseqs))
+#' }
+#'
+#' @seealso \code{\link{get_imaging}}, \code{\link{split_factor_labels}}
+#'
+#' @export
+
+get_mri_sequences <- function(name = c("abbreviation", "description")) {
+    name <- match.arg(name)
+    data <- abcdsReporter::get_imaging(done, mrseqs, imaging = "mrimeta")
+
+    colnames(data)[which(
+        colnames(data) == "done"
+    )] <- "mri_done"
+
+    for (i in seq_len(nrow(.mri_sequence_key))) {
+        data$mrseqs <- gsub(
+            .mri_sequence_key$description[i],
+            .mri_sequence_key$abbreviation[i],
+            data$mrseqs,
+            fixed = TRUE
+        )
     }
 
-    return(imaging_data)
+    data$mrseqs <- gsub("\\s*\\|\\s*", "|", data$mrseqs)
+    data <- split_factor_labels(data, mrseqs)
+
+    data <- data[, c(
+        setdiff(names(data), .mri_sequence_key$abbreviation),
+        .mri_sequence_key$abbreviation
+    )]
+
+    seq_cols <- data[, .mri_sequence_key$abbreviation]
+
+    data$mrseqs <-
+        purrr::pmap_chr(
+            seq_cols,
+            function(...) {
+                vals <- c(...)
+                keys <- which(vals == 1)
+                if (length(keys) == 0) {
+                    return(NA_character_)
+                }
+                paste(keys, collapse = "|")
+            }
+        )
+
+    if (name == "description") {
+        for (i in seq_len(nrow(.mri_sequence_key))) {
+            idx <- which(colnames(data) == .mri_sequence_key$abbreviation[i])
+            if (length(idx) > 0) {
+                colnames(data)[idx] <- .mri_sequence_key$description[i]
+            }
+        }
+    }
+
+    return(data)
 }
