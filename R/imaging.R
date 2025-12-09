@@ -99,7 +99,7 @@ get_imaging <- function(
 #'     \item \code{"description"} - Uses full descriptive names
 #'       (e.g., "T1 MPRAGE/ISSPGR", "3D FLAIR")
 #'   }
-#'
+#' @param ... Additional parameters to pass to get_imaging such as site, cycle, apply_labels, and controls
 #' @return A tibble containing MRI sequence data with the following components:
 #'   \itemize{
 #'     \item Standard imaging metadata columns (subject identifiers, dates, etc.)
@@ -138,17 +138,23 @@ get_imaging <- function(
 #' # Get MRI sequences with full descriptive column names
 #' mri_data <- get_mri_sequences(name = "description")
 #'
-#' # Check which sequences a participant completed
-#' subset(mri_data, subject_label == "12345", select = c(subject_label, mrseqs))
 #' }
 #'
 #' @seealso \code{\link{get_imaging}}, \code{\link{split_factor_labels}}
 #'
 #' @export
 
-get_mri_sequences <- function(name = c("abbreviation", "description")) {
+get_mri_sequences <- function(
+    name = c("abbreviation", "description"),
+    ...
+) {
     name <- match.arg(name)
-    data <- abcdsReporter::get_imaging(done, mrseqs, imaging = "mrimeta")
+    data <- abcdsReporter::get_imaging(
+        done,
+        mrseqs,
+        imaging = "mrimeta",
+        ...
+    )
 
     colnames(data)[which(
         colnames(data) == "done"

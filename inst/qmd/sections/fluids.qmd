@@ -1,40 +1,62 @@
 
 ```{r getting blood metadata from atri and loni for completed scans}
 #| echo: false
-#| eval: !expr params$blood
+#| eval: !expr (params$blood_draw_counts) | (params$blood_draw_counts_controls)
 #| results: asis
 
 abcdsReporter:::format_quarto("Blood Draw Data", type = "subsection")
 
-atri_blood <- abcdsReporter::get_blood(done)
-colnames(atri_blood)[which(colnames(atri_blood) == "done")] <- "paxdone"
+count_blood <- function(controls = FALSE, lonidir = NULL) {
+  atri_blood <- abcdsReporter::get_blood(done, controls = controls)
+  colnames(atri_blood)[which(colnames(atri_blood) == "done")] <- "paxdone"
+  id_vars <- abcdsReporter:::get_ids(atri_blood)
+  atri_blood$ids <- atri_blood$subject_label
+  if (controls) {
+    file_type <- "Sample_Collection_-_Blood__Controls__15Oct2025.csv"
+  } else {
+    file_type <- "Sample_Collection_-_Blood_15Oct2025.csv"
+  }
+  loni_blood <- readr::read_csv(
+    list.files(
+      lonidir,
+      pattern = file_type,
+      full.names = TRUE
+    ),
+    show_col_types = FALSE
+  )
+  atri_blood <- abcdsReporter:::loni_join(
+    atri_data = atri_blood,
+    loni_data = loni_blood,
+    variables = "paxdone"
+  )
 
-id_vars <- abcdsReporter:::get_ids(atri_blood)
-atri_blood$ids <- atri_blood$subject_label
+  blood_counts <- abcdsReporter::count_by(
+    data = atri_blood,
+    id = ids,
+    column = paxdone
+  )
 
-loni_blood <- readr::read_csv(
-  list.files(
-    Sys.getenv("ABCDS_LONI_DATA_DIRECTORY"),
-    pattern = "Sample_Collection_-_Blood_15Oct2025.csv",
-    full.names = TRUE
-  ),
-  show_col_types = FALSE
-)
+  if (controls) {
+    person <- "Sibling Controls"
+  } else {
+    person <- "Participants"
+  }
 
-atri_blood <- abcdsReporter:::loni_join(
-  atri_data = atri_blood,
-  loni_data = loni_blood,
-  variables = "paxdone"
-)
+  return(dplyr::bind_cols(Person = person, blood_counts))
+}
 
-blood_counts <- abcdsReporter::count_by(
-  data = atri_blood,
-  id = ids,
-  column = paxdone
-)
+if (params$blood_draw_counts & params$blood_draw_counts_controls) {
+  blood_counts <- count_blood(lonidir = params$lonidir) %>%
+    dplyr::bind_rows(count_blood(controls = TRUE, lonidir = params$lonidir))
+} else if (params$blood_draw_counts & !params$blood_draw_counts_controls) {
+  blood_counts <- count_blood(lonidir = params$lonidir)
+} else if (!params$blood_draw_counts & params$blood_draw_counts_controls) {
+  blood_counts <- count_blood(controls = TRUE, lonidir = params$lonidir)
+}
+
 
 bloodtime <- as.numeric(colnames(blood_counts)[
-  2:ncol(blood_counts)
+  3:ncol(blood_counts)
 ])
 
 blood_counts_footnote <- paste(
@@ -45,73 +67,106 @@ blood_counts_footnote <- paste(
 blood_counts %>%
   dplyr::rename(`Blood Draw` = variable) %>%
   dplyr::mutate(`Blood Draw` = "Count") %>%
-  flextable::flextable() %>%
-  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::as_grouped_data(groups = "Person") %>%
+  flextable::as_flextable(hide_grouplabel = TRUE) %>%
+  abcdsReporter:::ft_add_abcds_theme(grouped_column = TRUE) %>%
   flextable::add_footer_row(
     values = blood_counts_footnote,
-    colwidths = ncol(blood_counts)
+    colwidths = (max(bloodtime) + 1)
   ) %>%
-  flextable::width(j = 1, width = 2) %>%
-  flextable::width(j = 2:(max(bloodtime) + 1), width = 3.25 / max(bloodtime))
+  flextable::width(j = 1, width = 1) %>%
+  flextable::width(
+    j = 2:(max(bloodtime) + 1),
+    width = 4.25 / max(bloodtime)
+  ) %>%
+  flextable::bold(i = ~ !is.na(Person))
 
 ```
 
 
-
 ```{r getting csf metadata from atri and loni for completed scans}
 #| echo: false
-#| eval: !expr params$csf
+#| eval: !expr (params$csf_counts) | (params$csf_counts_controls)
 #| results: asis
 
 abcdsReporter:::format_quarto("CSF Spinal Tap", type = "subsection")
 
-atri_csf <- abcdsReporter::get_csf(done)
-colnames(atri_csf)[which(colnames(atri_csf) == "done")] <- "paxdone"
+count_csf <- function(controls = FALSE, lonidir = NULL) {
+  atri_csf <- abcdsReporter::get_csf(done, csfvolcoll, controls = controls)
+  colnames(atri_csf)[which(colnames(atri_csf) == "done")] <- "csf_done"
+  id_vars <- abcdsReporter:::get_ids(atri_csf)
+  atri_csf$ids <- atri_csf$subject_label
 
-id_vars <- abcdsReporter:::get_ids(atri_csf)
-atri_csf$ids <- atri_csf$subject_label
+  if (controls) {
+    file_type <- "Sample_Collection_-_CSF__Controls__15Oct2025.csv"
+  } else {
+    file_type <- "Sample_Collection_-_CSF_15Oct2025.csv"
+  }
 
-loni_csf <- readr::read_csv(
-  list.files(
-    Sys.getenv("ABCDS_LONI_DATA_DIRECTORY"),
-    pattern = "Sample_Collection_-_CSF_15Oct2025.csv",
-    full.names = TRUE
-  ),
-  show_col_types = FALSE
-)
+  loni_csf <- readr::read_csv(
+    list.files(
+      lonidir,
+      pattern = file_type,
+      full.names = TRUE
+    ),
+    show_col_types = FALSE
+  )
 
-atri_csf <- abcdsReporter:::loni_join(
-  atri_data = atri_csf,
-  loni_data = loni_csf,
-  variables = "csf_done"
-)
+  atri_csf <- abcdsReporter:::loni_join(
+    atri_data = atri_csf,
+    loni_data = loni_csf,
+    variables = c("csf_done", "csfvolcoll")
+  )
 
-csf_counts <- abcdsReporter::count_by(
-  data = atri_csf,
-  id = ids,
-  column = csf_done
-)
+  atri_csf$csf_valid <- atri_csf$csf_done == 1 & atri_csf$csfvolcoll > 0
+
+  csf_counts <- abcdsReporter::count_by(
+    data = atri_csf,
+    id = ids,
+    column = csf_valid
+  )
+
+  if (controls) {
+    person <- "Sibling Controls"
+  } else {
+    person <- "Participants"
+  }
+
+  return(dplyr::bind_cols(Person = person, csf_counts))
+}
+
+if (params$csf_counts & params$csf_counts_controls) {
+  csf_counts <- count_csf(lonidir = params$lonidir) %>%
+    dplyr::bind_rows(count_csf(controls = TRUE, lonidir = params$lonidir))
+} else if (params$csf_counts & !params$csf_counts_controls) {
+  csf_counts <- count_csf(lonidir = params$lonidir)
+} else if (!params$csf_counts & params$csf_counts_controls) {
+  csf_counts <- count_csf(controls = TRUE, lonidir = params$lonidir)
+}
 
 csftime <- as.numeric(colnames(csf_counts)[
-  2:ncol(csf_counts)
+  3:ncol(csf_counts)
 ])
 
 csf_counts_footnote <- paste(
   glue::glue("Numbers {min(csftime)} to {max(csftime)}"),
-  "show how many participants completed at least that many blood draws."
+  "show how many participants completed at least that many CSF Spinal Taps.",
+  "A valid CSF Spinal Tap requires the variable csfvolcoll (i.e., volume collected) to be greater than 0."
 )
 
 csf_counts %>%
   dplyr::rename(`CSF Spinal Tap` = variable) %>%
   dplyr::mutate(`CSF Spinal Tap` = "Count") %>%
-  flextable::flextable() %>%
-  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::as_grouped_data(groups = "Person") %>%
+  flextable::as_flextable(hide_grouplabel = TRUE) %>%
+  abcdsReporter:::ft_add_abcds_theme(grouped_column = TRUE) %>%
   flextable::add_footer_row(
     values = csf_counts_footnote,
-    colwidths = ncol(csf_counts)
+    colwidths = (max(csftime) + 1)
   ) %>%
-  flextable::width(j = 1, width = 2) %>%
-  flextable::width(j = 2:(max(csftime) + 1), width = 3.25 / max(csftime))
+  flextable::width(j = 1, width = 1.25) %>%
+  flextable::width(j = 2:(max(csftime) + 1), width = 4 / max(csftime)) %>%
+  flextable::bold(i = ~ !is.na(Person))
 
 
 ```
