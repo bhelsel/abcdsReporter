@@ -93,7 +93,7 @@ get_abcds_data <- function(
     if (length(x[!is.na(x)]) == 0) {
       return(NA_character_)
     } else {
-      return(max(x[!is.na(x)]))
+      return(as.character(max(x[!is.na(x)])))
     }
   }
 
