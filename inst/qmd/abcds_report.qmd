@@ -32,6 +32,8 @@ params <- yaml::read_yaml("_variables.yaml")
 
 {{< include sections/demographics.qmd >}}
 
+{{< include sections/caregiver.qmd >}}
+
 {{< include sections/cognition.qmd >}}
 
 {{< include sections/imaging.qmd >}}

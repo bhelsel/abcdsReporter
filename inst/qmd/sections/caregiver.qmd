@@ -1,0 +1,63 @@
+
+```{r completed ntgedsd assessments}
+#| echo: false
+#| eval: !expr (params$ntgedsd_counts)
+#| results: asis
+
+abcdsReporter:::format_quarto(
+  "Participants with Completed NTG-EDSD Assessments",
+  "subsection"
+)
+
+atri_ntgedsd <- abcdsReporter::get_ntgedsd(done)
+atri_ntgedsd$ids <- atri_ntgedsd$subject_label
+doneindx <- which(colnames(atri_ntgedsd) == "done")
+colnames(atri_ntgedsd)[doneindx] <- "ntg_done"
+
+if (!is.null(params$lonidir)) {
+  loni_ntgedsd <- utils::read.csv(list.files(
+    Sys.getenv("ABCDS_LONI_DATA_DIRECTORY"),
+    pattern = "NTG",
+    full.names = TRUE
+  ))
+
+  atri_ntgedsd <- abcdsReporter:::loni_join(
+    atri_data = atri_ntgedsd,
+    loni_data = loni_ntgedsd,
+    variables = "ntg_done"
+  )
+}
+
+ntgedsd_counts <- abcdsReporter::count_by(
+  data = atri_ntgedsd,
+  id = ids,
+  column = ntg_done
+)
+
+ntgedsdtime <- as.numeric(colnames(ntgedsd_counts)[
+  2:ncol(ntgedsd_counts)
+])
+
+ntgedsd_counts_footnote <- paste(
+  glue::glue("Numbers {min(ntgedsdtime)} to {max(ntgedsdtime)}"),
+  "show how many caregivers completed at least that many NTG-EDSD Assessments."
+)
+
+ntgedsd_counts %>%
+  dplyr::mutate(variable = "Count") %>%
+  dplyr::rename(`NTG-EDSD` = variable) %>%
+  flextable::flextable() %>%
+  abcdsReporter:::ft_add_abcds_theme() %>%
+  flextable::add_footer_row(
+    values = ntgedsd_counts_footnote,
+    colwidths = (max(ntgedsdtime) + 1)
+  ) %>%
+  flextable::width(j = 1, width = 1) %>%
+  flextable::width(
+    j = 2:(max(ntgedsdtime) + 1),
+    width = 4 / max(ntgedsdtime)
+  )
+
+abcdsReporter:::format_quarto(type = "newpage")
+
+```
