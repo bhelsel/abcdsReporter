@@ -4,7 +4,7 @@
 \alias{multiple_count_by}
 \title{Count Multiple Variables and Combine Results}
 \usage{
-multiple_count_by(data, names, labels, ids, ..., varname)
+multiple_count_by(data, names, labels, ids, ..., value = 1, varname)
 }
 \arguments{
 \item{data}{A data frame containing the variables to be counted.}
@@ -18,6 +18,10 @@ will replace the variable names in the output.}
 
 \item{ids}{Unquoted column name(s) to group by when counting. Can be a single
 variable or multiple variables using \code{c()}.}
+
+\item{...}{Grouping variables to count by (e.g., site_label)}
+
+\item{value}{The value to filter for in the column (default: 1)}
 
 \item{varname}{Character string specifying the name for the variable column
 in the output. Default column name "variable" will be renamed to this value.}

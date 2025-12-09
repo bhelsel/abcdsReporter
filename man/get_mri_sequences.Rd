@@ -4,7 +4,7 @@
 \alias{get_mri_sequences}
 \title{Get MRI Sequence Data}
 \usage{
-get_mri_sequences(name = c("abbreviation", "description"))
+get_mri_sequences(name = c("abbreviation", "description"), ...)
 }
 \arguments{
 \item{name}{Character string specifying the column naming convention for MRI
@@ -15,6 +15,8 @@ sequence types. Options are:
 \item \code{"description"} - Uses full descriptive names
 (e.g., "T1 MPRAGE/ISSPGR", "3D FLAIR")
 }}
+
+\item{...}{Additional parameters to pass to get_imaging such as site, cycle, apply_labels, and controls}
 }
 \value{
 A tibble containing MRI sequence data with the following components:
@@ -61,8 +63,6 @@ mri_data <- get_mri_sequences()
 # Get MRI sequences with full descriptive column names
 mri_data <- get_mri_sequences(name = "description")
 
-# Check which sequences a participant completed
-subset(mri_data, subject_label == "12345", select = c(subject_label, mrseqs))
 }
 
 }
