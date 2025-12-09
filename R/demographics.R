@@ -219,5 +219,6 @@ calculate_age_at_visit <- function(data, site, cycle) {
   data$age_at_visit <- as.numeric(format(data$de_eval_date, "%Y")) -
     as.numeric(data$ptdob)
   data$ptdob <- NULL
+  data$de_eval_date <- NULL
   return(data)
 }
