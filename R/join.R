@@ -20,7 +20,7 @@ loni_join <- function(atri_data, loni_data, variables) {
   atri_ids <- get_ids(atri_data)
 
   check_vars <- colnames(atri_data)[which(
-    !colnames(atri_data) %in% atri_ids
+    !colnames(atri_data) %in% c(atri_ids, "ids")
   )]
 
   for (varname in check_vars) {
@@ -78,7 +78,7 @@ loni_join <- function(atri_data, loni_data, variables) {
 
   joined_df$event_code = factor(
     joined_df$event_code,
-    levels = c("bl", "c2", "c3", "c4", "cyc1", "cyc2")
+    levels = c("bl", "c2", "c3", "c4", "cyc1", "cyc2", "cyc3", "cyc4")
   )
 
   joined_df$ids <- ifelse(
