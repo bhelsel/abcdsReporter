@@ -56,8 +56,10 @@ count_by <- function(data, id, ..., column, value = 1) {
 #' @param labels Character vector of display labels corresponding to each name
 #'   in \code{names}. Must be the same length as \code{names}. These labels
 #'   will replace the variable names in the output.
+#' @param ... Grouping variables to count by (e.g., site_label)
 #' @param ids Unquoted column name(s) to group by when counting. Can be a single
 #'   variable or multiple variables using \code{c()}.
+#' @param value The value to filter for in the column (default: 1)
 #' @param varname Character string specifying the name for the variable column
 #'   in the output. Default column name "variable" will be renamed to this value.
 #'
@@ -113,13 +115,22 @@ count_by <- function(data, id, ..., column, value = 1) {
 #'
 #' @export
 
-multiple_count_by <- function(data, names, labels, ids, ..., varname) {
+multiple_count_by <- function(
+  data,
+  names,
+  labels,
+  ids,
+  ...,
+  value = 1,
+  varname
+) {
   purrr::map2(names, labels, .f = function(x, y) {
     counts <- abcdsReporter::count_by(
       data = data,
       id = ids,
       ...,
-      column = !!rlang::sym(x)
+      column = !!rlang::sym(x),
+      value = value
     )
     counts[[1]] <- y
     return(counts)
@@ -131,3 +142,81 @@ multiple_count_by <- function(data, names, labels, ids, ..., varname) {
     )) %>%
     dplyr::rename(!!varname := variable)
 }
+
+write_counts_to_xlsx <- function(
+  data,
+  file,
+  sheetName,
+  id,
+  ...,
+  column,
+  value = 1
+) {
+  idvars <- c("subject_label", "u19_bds_id", "u01_niad_adds_id")
+  identifiers <- data %>%
+    dplyr::select({{ id }}, dplyr::all_of(idvars)) %>%
+    dplyr::group_by({{ id }}) %>%
+    tidyr::fill(idvars, .direction = "downup") %>%
+    dplyr::distinct() %>%
+    dplyr::ungroup()
+
+  data <- data %>%
+    dplyr::filter({{ column }} == value) %>%
+    dplyr::group_by({{ id }}) %>%
+    dplyr::mutate(
+      {{ column }} := as.integer({{ column }}),
+      position = dplyr::row_number(),
+      event_code = as.character(event_code)
+    ) %>%
+    dplyr::select({{ id }}, ..., {{ column }}, position) %>%
+    dplyr::ungroup()
+
+  visit_columns <- paste0("V", 1:max(data$position))
+  data$position <- paste0("V", data$position)
+
+  data <- data %>%
+    tidyr::pivot_wider(
+      names_from = position,
+      values_from = event_code,
+      values_fill = NA
+    ) %>%
+    dplyr::right_join(identifiers, ., by = "ids") %>%
+    {
+      rbind(
+        c(
+          rep(NA, 5),
+          colSums(
+            !is.na(dplyr::select(., dplyr::all_of(visit_columns))),
+            na.rm = TRUE
+          )
+        ),
+        .
+      )
+    }
+
+  if (file.exists(file)) {
+    wb <- openxlsx::loadWorkbook(file)
+  } else {
+    wb <- openxlsx::createWorkbook()
+  }
+
+  if (sheetName %in% names(wb)) {
+    openxlsx::removeWorksheet(wb, sheet = sheetName)
+  }
+
+  openxlsx::addWorksheet(wb, sheetName = sheetName)
+  openxlsx::writeData(wb, sheet = sheetName, x = data)
+  openxlsx::saveWorkbook(wb, file = file, overwrite = TRUE)
+
+  return(invisible(NULL))
+}
+
+# write_counts_to_xlsx(
+#   data = atri_imaging,
+#   file = "/Users/bhelsel/Desktop/abcds_imaging.xlsx",
+#   sheetName = "MRI Imaging",
+#   id = ids,
+#   event_code,
+#   column = mri_done,
+#   value = 1
+# )
